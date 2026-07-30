@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetFlow — Belajar Jaringan Komputer Lewat Simulasi Interaktif</title>
+<meta name="description" content="NetFlow mengubah materi jaringan komputer yang rumit jadi simulasi visual, analogi dunia nyata, dan kuis singkat yang bisa kamu klik sendiri.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --bg:#F6F4FC;
+  --bg-deep:#EFEBFA;
+  --surface:#FFFFFF;
+  --ink:#2E2452;
+  --muted:#746B99;
+  --line:#E4E0F5;
+  --primary:#5B4FE8;
+  --primary-ink:#4238C4;
+  --primary-tint:#EEECFE;
+  --data:#0FB981;
+  --data-tint:#E2F8EF;
+  --error:#FF6B4A;
+  --error-tint:#FFEBE4;
+  --font-display:'Plus Jakarta Sans', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --radius-lg:24px;
+  --radius-md:16px;
+  --radius-sm:10px;
+  --shadow-soft:0 8px 30px rgba(91,79,232,0.10);
+  --shadow-lift:0 16px 40px rgba(91,79,232,0.16);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth; overflow-x:hidden;}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *,*::before,*::after{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  color:var(--ink);
+  margin:0 0 .5em 0;
+  line-height:1.15;
+  letter-spacing:-0.01em;
+}
+p{margin:0 0 1em 0;}
+a{color:var(--primary-ink);}
+img,svg{max-width:100%;display:block;}
+button{font-family:inherit;}
+:focus-visible{outline:3px solid var(--primary); outline-offset:2px; border-radius:4px;}
+
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--font-mono); font-size:12px; font-weight:600;
+  letter-spacing:0.12em; text-transform:uppercase; color:var(--primary-ink);
+  background:var(--primary-tint); padding:6px 14px; border-radius:100px;
+  margin-bottom:18px;
+}
+.eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--data);}
+.section-head{max-width:640px; margin-bottom:44px;}
+.section-head h2{font-size:clamp(28px,4vw,38px);}
+.section-head p{color:var(--muted); font-size:17px; margin:0;}
+section{padding:96px 0;}
+.btn{
+  font-family:var(--font-display); font-weight:700; font-size:15px;
+  border-radius:100px; border:none; cursor:pointer; padding:14px 26px;
+  display:inline-flex; align-items:center; gap:8px; transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(0);}
+.btn-primary{background:var(--ink); color:#fff; box-shadow:var(--shadow-soft);}
+.btn-primary:hover{background:var(--primary-ink);}
+.btn-ghost{background:var(--surface); color:var(--ink); border:1.5px solid var(--line);}
+.btn-ghost:hover{border-color:var(--primary);}
+.btn-data{background:var(--data-tint); color:#0A7A56;}
+.btn-error{background:var(--error-tint); color:#B8391E;}
+.btn.is-active{background:var(--ink); color:#fff;}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+.card{background:var(--surface); border-radius:var(--radius-lg); border:1px solid var(--line); box-shadow:var(--shadow-soft);}
+
+/* ============ NAV ============ */
+.site-nav{
+  position:sticky; top:0; z-index:80; background:rgba(246,244,252,0.85);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+}
+.site-nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; gap:16px; flex-wrap:wrap; row-gap:10px;}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--font-display); font-weight:800; font-size:19px; color:var(--ink); text-decoration:none;}
+.brand-mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--primary),var(--data)); position:relative; flex:none;}
+.brand-mark::after{content:""; position:absolute; width:8px; height:8px; border-radius:50%; background:#fff; top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 0 0 3px rgba(255,255,255,.35);}
+.nav-links{display:flex; gap:4px; list-style:none; margin:0; padding:0; flex-wrap:wrap;}
+.nav-links a{
+  font-size:13.5px; font-weight:600; color:var(--muted); text-decoration:none;
+  padding:8px 12px; border-radius:100px; transition:background .15s, color .15s;
+  white-space:nowrap;
+}
+.nav-links a:hover{background:var(--primary-tint); color:var(--primary-ink);}
+.nav-right{display:flex; align-items:center; gap:10px;}
+.mode-switch{position:relative; display:flex; background:var(--bg-deep); border-radius:100px; padding:3px; gap:2px;}
+.mode-switch button{
+  border:none; background:transparent; font-size:12px; font-weight:700; font-family:var(--font-display);
+  padding:7px 12px; border-radius:100px; color:var(--muted); cursor:pointer; transition:all .15s;
+}
+.mode-switch button.is-active{background:var(--ink); color:#fff;}
+.mode-popover{
+  position:absolute; top:calc(100% + 12px); right:0; background:var(--ink); color:#fff;
+  padding:14px 16px; border-radius:var(--radius-sm); font-size:13px; line-height:1.5; max-width:260px;
+  box-shadow:var(--shadow-lift); opacity:0; transform:translateY(-6px); pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease; z-index:150;
+}
+.mode-popover.is-shown{opacity:1; transform:translateY(0);}
+.mode-popover b{display:block; margin-bottom:4px; font-family:var(--font-display); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#8EF0C7;}
+.mode-popover::before{content:""; position:absolute; bottom:100%; right:22px; border:6px solid transparent; border-bottom-color:var(--ink);}
+.nav-hamburger{
+  display:none; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+  width:36px; height:36px; border:none; background:var(--bg-deep); border-radius:10px; cursor:pointer; padding:0; flex:none;
+}
+.nav-hamburger span{ display:block; width:16px; height:2px; background:var(--ink); border-radius:2px; transition:transform .2s ease, opacity .2s ease; }
+.nav-hamburger.is-open span:nth-child(1){ transform:translateY(6px) rotate(45deg); }
+.nav-hamburger.is-open span:nth-child(2){ opacity:0; }
+.nav-hamburger.is-open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
+.mobile-nav-menu{
+  display:none; flex-direction:column; gap:2px; padding:8px 24px 18px; border-top:1px solid var(--line);
+}
+.mobile-nav-menu.is-open{ display:flex; }
+.mobile-nav-menu a{
+  font-size:15px; font-weight:600; color:var(--ink); text-decoration:none; padding:13px 12px; border-radius:12px;
+}
+.mobile-nav-menu a:active, .mobile-nav-menu a:hover{ background:var(--primary-tint); color:var(--primary-ink); }
+@media (max-width:980px){
+  .nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+}
+
+/* ============ HERO ============ */
+.hero{padding:72px 0 60px;}
+.hero .wrap{display:grid; grid-template-columns:1.1fr 1fr; gap:56px; align-items:center;}
+.hero h1{font-size:clamp(34px,5vw,54px); max-width:11ch;}
+.hero-sub{font-size:18px; color:var(--muted); max-width:46ch;}
+.hero-cta{display:flex; gap:12px; flex-wrap:wrap; margin-top:28px;}
+.hero-note{margin-top:22px; font-size:13.5px; color:var(--muted); display:flex; align-items:center; gap:8px;}
+.hero-note .dot{width:7px; height:7px; border-radius:50%; background:var(--data); box-shadow:0 0 0 4px var(--data-tint); flex:none;}
+
+/* hero decorative mini diagram */
+.hero-visual{position:relative;}
+.hero-diagram{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lift); padding:34px 24px 40px; position:relative; overflow:hidden;
+}
+.hero-diagram::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 85% -10%, rgba(91,79,232,.10), transparent 55%);}
+.hero-row{display:flex; align-items:center; justify-content:space-between; position:relative; z-index:2;}
+.hero-node{display:flex; flex-direction:column; align-items:center; gap:8px; width:64px;}
+.hero-node .ic{width:52px; height:52px; border-radius:14px; background:var(--bg-deep); display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid var(--line);}
+.hero-node span{font-size:11px; font-weight:600; color:var(--muted); text-align:center;}
+.hero-line{flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px); margin:0 4px 26px; position:relative;}
+.hero-packet{position:absolute; top:50%; left:0; width:12px; height:12px; margin-top:-6px; border-radius:50%; background:var(--data); box-shadow:0 0 0 5px var(--data-tint), 0 0 14px rgba(15,185,129,.6); animation:hero-travel 3.2s cubic-bezier(.4,0,.2,1) infinite;}
+@keyframes hero-travel{
+  0%{left:0; opacity:0;}
+  6%{opacity:1;}
+  46%{left:calc(100% - 12px); opacity:1;}
+  52%{opacity:0;}
+  100%{left:0; opacity:0;}
+}
+.hero-caption{margin-top:22px; font-size:13px; color:var(--muted); font-family:var(--font-mono); text-align:center; position:relative; z-index:2;}
+
+/* ============ MODULE 1: KANVAS JARINGAN ============ */
+.kanvas-layout{display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:start;}
+@media (max-width:900px){ .kanvas-layout{grid-template-columns:1fr;} .hero .wrap{grid-template-columns:1fr;} }
+.kanvas-main{padding:28px;}
+.kanvas-toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+.kanvas-templates{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;
+  padding-bottom:16px; border-bottom:1px dashed var(--line);
+}
+.kanvas-templates-label{
+  font-family:var(--font-mono); font-size:11.5px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.05em; margin-right:2px; white-space:nowrap;
+}
+.kanvas-toolbar button.is-active{background:var(--ink); color:#fff; border-color:var(--ink);}
+.kanvas-area-wrap{overflow-x:auto; border-radius:var(--radius-md);}
+.kanvas-area{
+  position:relative; min-width:560px; height:380px; border-radius:var(--radius-md);
+  border:1.5px dashed var(--line); background-color:var(--bg-deep);
+  background-image:radial-gradient(circle, var(--line) 1.5px, transparent 1.5px);
+  background-size:24px 24px; overflow:hidden;
+}
+#kanvasLines{position:absolute; inset:0; width:100%; height:100%; pointer-events:none;}
+#kanvasLines line{stroke:var(--muted); stroke-width:2; opacity:.55;}
+.kanvas-hint{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:40px; color:var(--muted); font-size:14px; pointer-events:none;}
+.kanvas-node{
+  position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center;
+  gap:6px; cursor:grab; user-select:none; touch-action:none; z-index:3;
+}
+.kanvas-node:active{cursor:grabbing;}
+.kanvas-node .ic{
+  width:56px; height:56px; border-radius:16px; background:var(--surface); border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:var(--shadow-soft);
+  transition:border-color .2s, box-shadow .2s, transform .2s;
+}
+.kanvas-node span{font-size:11px; font-weight:700; color:var(--ink); background:var(--surface); padding:2px 6px; border-radius:6px; white-space:nowrap;}
+.kanvas-node.is-selected .ic{border-color:var(--primary); box-shadow:0 0 0 5px var(--primary-tint);}
+.kanvas-node.is-active .ic{border-color:var(--data); box-shadow:0 0 0 5px var(--data-tint); transform:scale(1.08);}
+.kanvas-node.is-delete-hover .ic{border-color:var(--error); box-shadow:0 0 0 5px var(--error-tint);}
+#kanvasPacket{
+  position:absolute; width:14px; height:14px; margin-left:-7px; margin-top:-7px; border-radius:50%; background:var(--data);
+  box-shadow:0 0 0 6px var(--data-tint), 0 0 16px rgba(15,185,129,.55); opacity:0; z-index:5;
+  transition:left .55s cubic-bezier(.45,0,.2,1), top .55s cubic-bezier(.45,0,.2,1), opacity .2s;
+}
+.kanvas-send-row{display:flex; align-items:center; gap:10px; margin:20px 0 0; flex-wrap:wrap;}
+.kanvas-send-row span{color:var(--muted); font-weight:700;}
+.select-input{
+  flex:1; min-width:140px; padding:11px 14px; border-radius:100px; border:1.5px solid var(--line);
+  background:var(--surface); font-family:inherit; font-size:13.5px; color:var(--ink);
+}
+.network-log{
+  margin-top:18px; background:var(--bg-deep); border-radius:var(--radius-md); padding:18px 20px;
+  font-family:var(--font-mono); font-size:13.5px; min-height:56px; max-height:220px; overflow-y:auto;
+}
+.network-log .log-line{padding:4px 0; color:var(--muted); border-bottom:1px dashed var(--line);}
+.network-log .log-line:last-child{border-bottom:none; color:var(--ink); font-weight:600;}
+.network-log .log-line.err{color:#B8391E;}
+.network-log .log-empty{color:var(--muted); font-style:italic;}
+.kanvas-osi-panel{padding:28px;}
+.osi-stack{display:flex; flex-direction:column; gap:8px;}
+.osi-bar{
+  position:relative; padding:10px 12px; border-radius:14px; background:var(--surface); border:1.5px solid var(--line);
+  display:flex; align-items:center; gap:10px; cursor:pointer; overflow:hidden;
+  transition:transform .15s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.osi-bar:hover{transform:scale(1.015); box-shadow:var(--shadow-soft);}
+.osi-bar:active{transform:scale(1.02);}
+.osi-bar-icon{
+  flex:none; width:32px; height:32px; border-radius:50%; background:var(--bg-deep);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  transition:background .25s ease, transform .25s ease;
+}
+.osi-bar-body{display:flex; flex-direction:column; gap:0px; min-width:0;}
+.osi-bar-layer{font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--muted); text-transform:uppercase;}
+.osi-bar-title{font-size:13px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.osi-bar-state{
+  flex:none; margin-left:auto; width:22px; height:22px; border-radius:50%; background:var(--bg-deep);
+  display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent; transition:all .2s ease;
+}
+.osi-bar-sweep{position:absolute; bottom:0; left:0; height:2px; width:100%; background:var(--data); transform:scaleX(0); transform-origin:left; opacity:0;}
+
+.osi-bar.is-current{ background-color:var(--data-tint); border-color:var(--data);
+  background-image:linear-gradient(0deg, transparent 40%, rgba(15,185,129,.10) 41%, rgba(15,185,129,.10) 42%, transparent 43%),
+    linear-gradient(90deg, transparent 40%, rgba(15,185,129,.10) 41%, rgba(15,185,129,.10) 42%, transparent 43%);
+  background-size:20px 20px;
+}
+.osi-bar.is-current .osi-bar-icon{ background:var(--data); transform:scale(1.1); }
+.osi-bar.is-current .osi-bar-state{ background:var(--data); color:#fff; }
+.osi-bar.is-current .osi-bar-sweep{ opacity:1; animation:osiSweep .5s ease-out forwards; }
+@keyframes osiSweep{ from{transform:scaleX(0);} to{transform:scaleX(1);} }
+
+.osi-bar.is-done .osi-bar-icon{ background:var(--data-tint); }
+.osi-bar.is-done .osi-bar-state{ background:var(--data-tint); color:#0A7A56; }
+.osi-story-text{font-size:15px; color:var(--ink); margin-bottom:0;}
+.detail-box{background:var(--bg-deep); border-radius:var(--radius-sm); padding:14px 16px; margin-top:14px; font-size:13.5px; color:var(--muted);}
+.detail-box.pro-box{font-family:var(--font-mono); font-size:12.5px;}
+.detail-box .lab{font-weight:700; color:var(--ink); font-family:var(--font-body); font-size:12px; text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:6px;}
+
+/* ============ MODULE 2: FLIP CARDS ============ */
+.toggle-row{display:flex; gap:10px; margin-bottom:30px; flex-wrap:wrap;}
+.cards-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+@media (max-width:820px){ .cards-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .cards-grid{grid-template-columns:1fr;} }
+.flip-card{perspective:1200px; height:210px; cursor:pointer;}
+.flip-card-inner{position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,0,.2,1); transform-style:preserve-3d;}
+.flip-card.is-flipped .flip-card-inner{transform:rotateY(180deg);}
+.flip-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--radius-md);
+  padding:22px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid var(--line);
+}
+.flip-front{background:var(--surface); box-shadow:var(--shadow-soft);}
+.flip-back{background:var(--ink); color:#fff; transform:rotateY(180deg); border:none;}
+.flip-face .big-ic{font-size:34px;}
+.flip-face h4{margin:0; font-size:17px;}
+.flip-back h4{color:#fff;}
+.flip-face p{margin:0; font-size:13.5px; color:var(--muted);}
+.flip-back p{color:#D8D4F5; font-size:13.5px;}
+.flip-tag{font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);}
+.flip-back .flip-tag{color:#A79EE8;}
+.hint-tap{font-size:11px; color:var(--muted); font-family:var(--font-mono);}
+
+.guess-prompt{text-align:center; padding:30px; margin-bottom:24px;}
+.guess-prompt .big-ic{font-size:44px; margin-bottom:12px;}
+.guess-options{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:640px; margin:0 auto;}
+@media (max-width:560px){ .guess-options{grid-template-columns:1fr;} }
+.guess-opt{padding:14px 16px; border-radius:var(--radius-sm); text-align:left; font-weight:600; font-size:14.5px;}
+.guess-opt.correct{background:var(--data-tint); border-color:var(--data); color:#0A7A56;}
+.guess-opt.wrong{background:var(--error-tint); border-color:var(--error); color:#B8391E;}
+.guess-feedback{text-align:center; margin-top:18px; font-size:14px; color:var(--muted); min-height:22px;}
+.guess-footer{display:flex; justify-content:center; margin-top:20px;}
+
+/* ============ MODULE 4: GLOSSARY ============ */
+.glossary-para{font-size:18px; line-height:1.9; padding:30px 34px; margin-bottom:36px;}
+.term-btn{
+  background:none; border:none; border-bottom:2px dotted var(--primary); color:var(--primary-ink);
+  font-weight:700; font-size:inherit; font-family:inherit; cursor:pointer; padding:0 1px; position:relative;
+}
+.term-tip{
+  position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%) translateY(6px);
+  background:var(--ink); color:#fff; padding:10px 14px; border-radius:10px; font-size:13px; font-weight:500;
+  width:max-content; max-width:240px; line-height:1.4; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  z-index:20; font-family:var(--font-body); text-align:left;
+}
+.term-tip::after{content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--ink);}
+.term-btn.is-open .term-tip{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+.glossary-folder-row{display:flex; gap:36px; align-items:flex-start; flex-wrap:wrap; margin-top:56px;}
+.folder-card-slot{padding-top:100px; padding-right:50px;}
+.glossary-preview{flex:1; min-width:260px; padding:26px; align-self:stretch;}
+.glossary-preview-hint{color:var(--muted); font-size:14px; margin:0;}
+.glossary-preview-icon{font-size:30px; margin-bottom:8px;}
+.glossary-preview h4{font-size:16px; margin-bottom:6px;}
+.glossary-preview p{font-size:14px; color:var(--muted); margin:0;}
+.glossary-preview-more{margin-top:12px; font-size:12.5px; color:var(--primary-ink); font-weight:600;}
+
+/* ---- folder-card (adapted from Uiverse.io by byllzz) ---- */
+.folder-card{ width:170px; height:130px; perspective:1200px; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; -webkit-tap-highlight-color:transparent; }
+.folder-toggle{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.hint-wrapper{ position:absolute; top:-40px; right:-50px; display:flex; flex-direction:column; align-items:center; gap:2px; transition:opacity .3s ease, transform .3s ease; pointer-events:none; z-index:100; animation:floatHint 2.5s ease-in-out infinite; }
+.hint-text{ font-family:var(--font-display); color:#4238C4; font-size:10px; font-weight:800; text-decoration:underline; letter-spacing:.5px; white-space:nowrap; position:relative; right:-25px; top:10px; transform:rotate(45deg); }
+.hint-arrow{ height:35px; width:35px; }
+@keyframes floatHint{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+.folder-toggle:checked ~ .hint-wrapper{ opacity:0; transform:translateY(-10px); }
+.folder-container{ position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .6s cubic-bezier(.23,1,.32,1); backface-visibility:hidden; will-change:transform; }
+.folder-toggle:checked ~ .folder-container{ transform:rotateX(10deg) rotateY(-5deg); }
+.folder-back{ position:absolute; bottom:0; width:100%; filter:drop-shadow(0 10px 20px rgba(46,36,82,.28)); }
+.folder-front-wrapper{ position:absolute; bottom:-7px; width:100%; z-index:90; transform-origin:bottom; transition:transform .5s cubic-bezier(.175,.885,.32,1.275); border-radius:var(--radius-sm); }
+.folder-label{ position:absolute; top:10px; left:10px; width:30px; height:4px; background:rgba(255,255,255,.55); border-radius:10px; }
+.counter{
+  position:absolute; top:-95px; right:-75px; background-color:var(--primary);
+  padding:4px 10px; border-radius:100px; display:flex; align-items:center; gap:8px;
+  box-shadow:0 10px 20px rgba(46,36,82,.25), inset 0 1px 1px rgba(255,255,255,.2);
+  transform:scale(0) translateY(20px); opacity:0; transition:all .5s cubic-bezier(.34,1.56,.64,1);
+  z-index:100; pointer-events:auto;
+}
+.folder-toggle:checked ~ .folder-container .counter{ transform:scale(1) translateY(0); opacity:1; transition-delay:.2s; }
+.status-dot{ width:6px; height:6px; background:var(--data); border-radius:50%; position:relative; box-shadow:0 0 10px var(--data); }
+.status-dot::after{ content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:var(--data); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse{ 0%{transform:scale(1); opacity:1;} 100%{transform:scale(3); opacity:0;} }
+.counter-label{ font-family:var(--font-display); font-size:8px; font-weight:800; color:#fff; text-transform:uppercase; }
+.counter-number{ font-family:var(--font-display); font-size:12px; font-weight:800; color:#fff; }
+.folder-card .file{ position:absolute; bottom:5px; left:10%; width:80%; height:85px; border-radius:var(--radius-sm); overflow:hidden; box-shadow:inset 0 1px 1px rgba(255,255,255,.25), 0 4px 12px rgba(46,36,82,.25); transition:all .6s cubic-bezier(.68,-.55,.265,1.55); z-index:0; cursor:pointer; }
+.file-1{ background:var(--primary); z-index:25; transition-delay:.15s; }
+.file-2{ background:#17C98D; z-index:24; transition-delay:.1s; }
+.file-3{ background:var(--primary-ink); z-index:23; transition-delay:.05s; }
+.file-4{ background:#6C5FF0; z-index:22; transition-delay:.02s; }
+.file-5{ background:var(--data); z-index:21; transition-delay:0s; }
+.folder-card .file[style*="display: none"]{ transition:none; }
+.shine{ position:absolute; top:0; left:-100%; width:50%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); transform:skewX(-20deg); transition:none; }
+.folder-toggle:checked ~ .folder-container .shine{ left:150%; transition:left .8s ease-in-out; transition-delay:.3s; }
+.file-icon-emoji{ position:absolute; top:8px; right:10px; font-size:16px; opacity:.9; }
+.file-text{ font-family:var(--font-display); font-size:12px; color:#fff; padding:12px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,.15); opacity:0; transform:translateY(5px); transition:all .3s ease .4s; }
+.folder-toggle:checked ~ .folder-container .file-text{ opacity:1; transform:translateY(0); }
+.folder-toggle:checked ~ .folder-container .folder-front-wrapper{ transform:rotateX(-50deg); }
+.folder-toggle:checked ~ .folder-container .file-1{ transform:translateY(-70px) rotate(-10deg) translateX(-15px) translateZ(20px); }
+.folder-toggle:checked ~ .folder-container .file-2{ transform:translateY(-55px) rotate(8deg) translateX(18px) translateZ(10px); }
+.folder-toggle:checked ~ .folder-container .file-3{ transform:translateY(-40px) rotate(-15deg) translateX(-8px); }
+.folder-toggle:checked ~ .folder-container .file-4{ transform:translateY(-25px) rotate(12deg) translateX(12px); }
+.folder-toggle:checked ~ .folder-container .file-5{ transform:translateY(-10px) rotate(-5deg); }
+.folder-toggle:checked ~ .folder-container .file:hover{ filter:brightness(1.08); }
+.folder-toggle:checked ~ .folder-container .file-1:hover{ transform:translateY(-80px) rotate(-10deg) translateX(-15px) translateZ(20px); }
+.folder-toggle:checked ~ .folder-container .file-2:hover{ transform:translateY(-65px) rotate(8deg) translateX(18px) translateZ(10px); }
+.folder-toggle:checked ~ .folder-container .file-3:hover{ transform:translateY(-50px) rotate(-15deg) translateX(-8px); }
+.folder-toggle:checked ~ .folder-container .file-4:hover{ transform:translateY(-35px) rotate(12deg) translateX(12px); }
+.folder-toggle:checked ~ .folder-container .file-5:hover{ transform:translateY(-20px) rotate(-5deg); }
+.file-tag{
+  position:absolute; bottom:8px; left:10px; right:10px; background:rgba(0,0,0,.35); backdrop-filter:blur(4px);
+  color:rgba(255,255,255,.95); font-family:var(--font-body); font-size:9px; font-weight:600; padding:3px 6px;
+  border-radius:5px; opacity:0; transform:translateX(6px); transition:all .3s cubic-bezier(.34,1.56,.64,1); pointer-events:none;
+}
+.folder-toggle:checked ~ .folder-container .file-tag{ opacity:1; transform:translateX(0); }
+.folder-search{
+  position:absolute; top:-40px; left:10%; width:30px; height:25px; background-color:var(--data);
+  border-radius:20px; display:flex; align-items:center; padding:0 8px;
+  transition:all .5s cubic-bezier(.68,-.55,.265,1.275); opacity:0; z-index:100; border:1px solid rgba(255,255,255,.25);
+}
+.search-icon{ width:12px; height:12px; flex-shrink:0; }
+.folder-search .search-input{
+  background:transparent; border:none; color:#fff; font-family:var(--font-body); font-size:10px;
+  margin-left:8px; outline:none; transition:width .4s ease; width:100%;
+}
+.folder-search .search-input::placeholder{ color:rgba(255,255,255,.85); }
+.folder-toggle:checked ~ .folder-container .folder-search{ opacity:1; top:-80px; width:85%; }
+.folder-toggle:checked ~ .folder-container .folder-search:focus-within{ width:95%; }
+
+/* ============ MODULE 5: SUBNET CALC ============ */
+.calc-layout{display:grid; grid-template-columns:1fr 1.25fr; gap:28px; align-items:start;}
+@media (max-width:900px){ .calc-layout{grid-template-columns:1fr;} }
+.calc-form{padding:30px;}
+.field{margin-bottom:22px;}
+.field label{display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);}
+.field input[type=text]{
+  width:100%; padding:13px 16px; border-radius:var(--radius-sm); border:1.5px solid var(--line);
+  font-family:var(--font-mono); font-size:15px; background:var(--bg-deep);
+}
+.field input[type=range]{width:100%; accent-color:var(--primary);}
+.cidr-row{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:13px; color:var(--muted); margin-top:6px;}
+.cidr-value{font-family:var(--font-mono); font-weight:700; color:var(--primary-ink); font-size:15px;}
+.calc-err{color:#B8391E; font-size:13px; margin-top:6px; min-height:16px;}
+
+.bitgrid-wrap{padding:26px 30px; margin-bottom:20px;}
+.bitgrid-wrap h4{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:16px;}
+.bitgrid{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-bottom:10px;}
+.bit-octet-label{grid-column:span 8; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin:6px 0 2px;}
+.bit-cell{aspect-ratio:1; border-radius:5px; background:var(--bg-deep);}
+.bit-cell.net{background:var(--primary);}
+.bit-cell.host{background:var(--data-tint); border:1.5px solid var(--data);}
+.bitgrid-legend{display:flex; gap:18px; font-size:12.5px; color:var(--muted); flex-wrap:wrap;}
+.bitgrid-legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend-sw{width:12px; height:12px; border-radius:3px; display:inline-block;}
+
+.result-table{padding:8px 30px 26px;}
+.result-row{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--line);}
+.result-row:last-child{border-bottom:none;}
+.result-row .lab{font-size:13.5px; color:var(--muted); font-weight:600;}
+.result-row .val{font-family:var(--font-mono); font-weight:700; font-size:15px;}
+.result-row.pro-row{display:none;}
+body[data-mode="pro"] .result-row.pro-row{display:flex;}
+
+/* Mode toggle actually controls extra detail depth: Pemula sees neither,
+   Menengah sees "menengah" detail only, Pro sees everything. */
+body[data-mode="pemula"] .detail-menengah,
+body[data-mode="pemula"] .detail-pro{ display:none; }
+body[data-mode="menengah"] .detail-pro{ display:none; }
+.mode-hint{
+  font-size:12.5px; color:var(--primary-ink); background:var(--primary-tint);
+  padding:10px 14px; border-radius:var(--radius-sm); margin-top:14px; display:none;
+}
+body[data-mode="pemula"] .mode-hint{ display:block; }
+
+/* ============ MODULE 6: QUIZ ============ */
+.quiz-card{padding:38px; max-width:680px; margin:0 auto;}
+.quiz-progress{display:flex; gap:8px; margin-bottom:26px;}
+.quiz-dot{flex:1; height:6px; border-radius:100px; background:var(--line);}
+.quiz-dot.is-done{background:var(--data);}
+.quiz-dot.is-current{background:var(--primary);}
+.quiz-q{font-size:20px; margin-bottom:22px;}
+.quiz-opts{display:flex; flex-direction:column; gap:10px;}
+.quiz-opt{padding:15px 18px; border-radius:var(--radius-sm); text-align:left; font-weight:600; font-size:15px; width:100%;}
+.quiz-opt.correct{background:var(--data-tint); border-color:var(--data); color:#0A7A56;}
+.quiz-opt.wrong{background:var(--error-tint); border-color:var(--error); color:#B8391E;}
+.quiz-explain{background:var(--bg-deep); border-radius:var(--radius-sm); padding:16px 18px; margin-top:18px; font-size:14px; display:none;}
+.quiz-explain.is-shown{display:block;}
+.quiz-explain b{display:block; margin-bottom:4px;}
+.quiz-next{display:flex; justify-content:flex-end; margin-top:20px;}
+.quiz-summary{text-align:center; display:none;}
+.quiz-summary.is-shown{display:block;}
+.quiz-summary .score{font-family:var(--font-display); font-size:52px; font-weight:800; color:var(--primary-ink); margin-bottom:6px;}
+.quiz-summary p{color:var(--muted);}
+
+/* ============ MODULE 7: PROGRESS ============ */
+.progress-layout{display:grid; grid-template-columns:1fr; max-width:640px;}
+.progress-card{padding:30px;}
+.checklist{list-style:none; margin:0; padding:0;}
+.checklist li{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14.5px; font-weight:600; color:var(--muted);}
+.checklist li:last-child{border-bottom:none;}
+.check-mark{width:24px; height:24px; border-radius:50%; border:2px solid var(--line); flex:none; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .25s; color:transparent;}
+.checklist li.is-complete{color:var(--ink);}
+.checklist li.is-complete .check-mark{background:var(--data); border-color:var(--data); color:#fff;}
+
+/* ============ FOOTER ============ */
+footer{padding:60px 0 40px; border-top:1px solid var(--line);}
+footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+footer p{margin:0; font-size:13.5px; color:var(--muted);}
+
+/* utility */
+.hidden{display:none !important;}
+
+/* ============ MOBILE REFINEMENTS ============ */
+@media (max-width:640px){
+  .wrap{padding:0 18px;}
+  section{padding:60px 0;}
+  .hero{padding:40px 0 32px;}
+  .hero-cta{margin-top:22px;}
+  .quiz-card{padding:24px;}
+  .osi-story-card, .kanvas-main, .kanvas-osi-panel, .calc-form, .bitgrid-wrap, .result-table{padding:20px;}
+  .kanvas-area{min-width:100%;}
+  .folder-card-slot{padding-top:64px; padding-right:10px;}
+  .hint-wrapper{top:-28px; right:-6px;}
+  .counter{top:-64px; right:-10px;}
+  .glossary-folder-row{justify-content:center;}
+  .folder-card-slot{display:flex; justify-content:center;}
+}
+@media (max-width:400px){
+  .hero-node{width:52px;}
+  .hero-node .ic{width:42px; height:42px; font-size:18px; border-radius:11px;}
+  .hero-diagram{padding:22px 14px 26px;}
+  .hero-node span{font-size:10px;}
+  .site-nav .wrap{padding:12px 16px;}
+  .mode-switch button{padding:6px 9px; font-size:11px;}
+  .brand{font-size:17px;}
+}
+</style>
+</head>
+<body data-mode="pemula">
+
+<!-- ============ NAV ============ -->
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="brand-mark"></span> NetFlow</a>
+    <ul class="nav-links">
+      <li><a href="#kanvas-jaringan">Kanvas Jaringan</a></li>
+      <li><a href="#kartu-analogi">Kartu Analogi</a></li>
+      <li><a href="#glosarium">Glosarium</a></li>
+      <li><a href="#subnet-calculator">Kalkulator Subnet</a></li>
+      <li><a href="#progres">Progres</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="mode-switch" id="modeSwitch" role="group" aria-label="Tingkat penjelasan">
+        <button data-level="pemula" class="is-active" title="Banyak analogi, minim istilah teknis">Pemula</button>
+        <button data-level="menengah" title="Penjelasan standar dengan istilah teknis dasar">Menengah</button>
+        <button data-level="pro" title="Detail teknis lengkap + contoh protokol/CLI">Pro</button>
+        <div class="mode-popover" id="modePopover"></div>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Buka menu navigasi" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav-menu" id="mobileNavMenu">
+    <a href="#kanvas-jaringan">Kanvas Jaringan</a>
+    <a href="#kartu-analogi">Kartu Analogi</a>
+    <a href="#glosarium">Glosarium</a>
+    <a href="#subnet-calculator">Kalkulator Subnet</a>
+    <a href="#progres">Progres</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span> Platform Belajar Jaringan Interaktif</div>
+      <h1>Jaringan Komputer, Akhirnya Masuk Akal.</h1>
+      <p class="hero-sub">Susun sendiri perangkatnya, sambungkan kabelnya, lalu kirim data — dan lihat bagaimana tiap lapisan OSI benar-benar bekerja di topologi buatanmu sendiri. Bukan sekadar teks tebal yang bikin ngantuk.</p>
+      <div class="hero-cta">
+        <a href="#kanvas-jaringan" class="btn btn-primary">Mulai di Kanvas ↓</a>
+        <a href="#kartu-analogi" class="btn btn-ghost">Coba Kartu & Kuis</a>
+      </div>
+      <div class="hero-note"><span class="dot"></span> 5 modul interaktif, tanpa perlu install apa pun.</div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-diagram">
+        <div class="hero-row">
+          <div class="hero-node"><div class="ic">💻</div><span>Laptop</span></div>
+          <div class="hero-line"><div class="hero-packet"></div></div>
+          <div class="hero-node"><div class="ic">🔀</div><span>Switch</span></div>
+          <div class="hero-line" style="animation-delay:.2s"><div class="hero-packet" style="animation-delay:.5s"></div></div>
+          <div class="hero-node"><div class="ic">📡</div><span>Router</span></div>
+          <div class="hero-line"><div class="hero-packet" style="animation-delay:1s"></div></div>
+          <div class="hero-node"><div class="ic">🖥️</div><span>Server</span></div>
+        </div>
+        <div class="hero-caption">// begitulah data kamu berjalan — coba sendiri di bawah</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ MODULE 1: KANVAS JARINGAN (topologi + animasi OSI jadi satu) ============ -->
+<section id="kanvas-jaringan">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> Modul 01 — Kanvas Interaktif</div>
+      <h2>Kanvas Jaringan: Rakit Sendiri, Lihat Sendiri</h2>
+      <p>Tambahkan perangkat, sambungkan kabelnya sendiri, lalu kirim data — dan lihat animasi tiap lapisan OSI aktif secara langsung, mengikuti topologi buatanmu sendiri. Kalau perangkatnya belum tersambung, kamu juga akan lihat sendiri kenapa datanya gagal terkirim.</p>
+    </div>
+
+    <div class="kanvas-layout">
+      <div class="card kanvas-main">
+        <div class="kanvas-templates">
+          <span class="kanvas-templates-label">⚡ Mode Cepat — Muat Topologi</span>
+          <button class="btn btn-ghost" data-template="bus">Bus</button>
+          <button class="btn btn-ghost" data-template="star">Star</button>
+          <button class="btn btn-ghost" data-template="ring">Ring</button>
+          <button class="btn btn-ghost" data-template="mesh">Mesh</button>
+          <button class="btn btn-ghost" data-template="tree">Tree</button>
+        </div>
+        <div class="kanvas-toolbar">
+          <button class="btn btn-ghost" data-add="laptop">+ 💻 Laptop</button>
+          <button class="btn btn-ghost" data-add="switch">+ 🔀 Switch</button>
+          <button class="btn btn-ghost" data-add="router">+ 📡 Router</button>
+          <button class="btn btn-ghost" data-add="server">+ 🖥️ Server</button>
+          <button class="btn btn-ghost" id="btnConnectMode">🔗 Mode Sambung</button>
+          <button class="btn btn-ghost" id="btnDeleteMode">🗑️ Mode Hapus</button>
+          <button class="btn btn-ghost" id="btnResetCanvas">↺ Reset Kanvas</button>
+        </div>
+
+        <div class="kanvas-area-wrap">
+          <div class="kanvas-area" id="kanvasArea">
+            <svg id="kanvasLines"></svg>
+            <div id="kanvasPacket"></div>
+            <div class="kanvas-hint" id="kanvasHint">👆 Klik salah satu tombol "+ Perangkat" di atas untuk mulai membangun jaringanmu.</div>
+          </div>
+        </div>
+
+        <div class="kanvas-send-row">
+          <select id="sendFrom" class="select-input"><option value="">Dari perangkat...</option></select>
+          <span>→</span>
+          <select id="sendTo" class="select-input"><option value="">Ke perangkat...</option></select>
+          <button class="btn btn-data" id="btnSendCanvas">▶ Kirim Data</button>
+        </div>
+        <div class="network-log" id="kanvasLog">
+          <div class="log-line log-empty">Tambahkan perangkat, sambungkan lewat 🔗 Mode Sambung, lalu kirim data untuk melihat animasinya…</div>
+        </div>
+      </div>
+
+      <div class="card kanvas-osi-panel">
+        <h4>Lapisan OSI yang Aktif</h4>
+        <div class="osi-stack" id="kanvasOsiStack"><!-- bars injected by JS --></div>
+        <div class="mode-hint">💡 Ada penjelasan teknis tambahan di mode <b>Menengah</b> & <b>Pro</b> — coba ganti lewat sakelar di pojok kanan atas.</div>
+        <div id="kanvasOsiInfo">
+          <p class="osi-story-text" id="kanvasOsiText">Klik salah satu layer di atas untuk lihat penjelasannya, atau kirim data untuk lihat animasinya berjalan otomatis.</p>
+          <div class="detail-box detail-menengah" id="kanvasOsiMenengah"></div>
+          <div class="detail-box pro-box detail-pro" id="kanvasOsiPro"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 2: FLIP CARDS ============ -->
+<section id="kartu-analogi">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> Modul 02 — Analogi Dunia Nyata</div>
+      <h2>Istilah Jaringan Itu Sebenarnya Hal yang Kamu Sudah Tahu</h2>
+      <p>Setiap istilah teknis punya "kembaran" di dunia nyata. Balik kartunya untuk lihat konsep jaringannya, coba Mode Tebak Konsep untuk menguji pemahamanmu, atau langsung ke Kuis Mini untuk soal yang lebih menyeluruh.</p>
+    </div>
+
+    <div class="toggle-row">
+      <button class="btn btn-primary is-active" id="modeJelajahBtn">Jelajah Set Kartu</button>
+      <button class="btn btn-ghost" id="modeTebakBtn">Mode Tebak Konsep</button>
+      <button class="btn btn-ghost" id="modeKuisBtn">Kuis Mini</button>
+    </div>
+
+    <div id="jelajahBox">
+      <div class="cards-grid" id="flipCardsGrid"><!-- cards injected by JS --></div>
+    </div>
+
+    <div class="guess-box hidden" id="guessBox">
+      <div class="card guess-prompt" id="guessPrompt"></div>
+      <div class="guess-options" id="guessOptions"></div>
+      <div class="guess-feedback" id="guessFeedback"></div>
+      <div class="guess-footer">
+        <button class="btn btn-ghost hidden" id="guessNextBtn">Soal Berikutnya →</button>
+      </div>
+    </div>
+
+    <div id="quizBox" class="hidden">
+      <div class="card quiz-card" id="quizCard">
+        <div class="quiz-progress" id="quizProgress"></div>
+        <div id="quizBody">
+          <h3 class="quiz-q" id="quizQuestion"></h3>
+          <div class="quiz-opts" id="quizOpts"></div>
+          <div class="quiz-explain" id="quizExplain"></div>
+          <div class="quiz-next">
+            <button class="btn btn-primary hidden" id="quizNextBtn">Lanjut →</button>
+          </div>
+        </div>
+        <div class="quiz-summary" id="quizSummary">
+          <div class="score" id="quizScore">0/3</div>
+          <p id="quizSummaryText">Terus berlatih, ya!</p>
+          <button class="btn btn-primary" id="quizRestartBtn">Ulangi Kuis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 4: GLOSSARY ============ -->
+<section id="glosarium">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> Modul 03 — Kamus Siap Pakai</div>
+      <h2>Glosarium Melayang</h2>
+      <p>Klik/tap istilah yang bergaris putus-putus untuk lihat artinya sekilas. Atau cari langsung di kamus lengkap di bawah.</p>
+    </div>
+
+    <div class="card glossary-para" id="glossaryPara">
+      Saat kamu membuka sebuah website, perangkatmu lebih dulu bertanya ke
+      <button class="term-btn" data-term="dns">DNS<span class="term-tip">Seperti buku telepon internet — mengubah nama website jadi IP Address.</span></button>
+      untuk mencari
+      <button class="term-btn" data-term="ip">IP Address<span class="term-tip">Alamat unik tiap perangkat di jaringan, seperti alamat rumah.</span></button>
+      tujuan. Data lalu dikirim lewat
+      <button class="term-btn" data-term="bandwidth">Bandwidth<span class="term-tip">Kapasitas maksimum data yang bisa lewat dalam satu waktu, seperti lebar jalan tol.</span></button>
+      yang tersedia, dijaga oleh
+      <button class="term-btn" data-term="firewall">Firewall<span class="term-tip">Penjaga gerbang yang memeriksa data mana yang boleh masuk/keluar.</span></button>
+      , dan dibagi ke blok-blok kecil lewat proses
+      <button class="term-btn" data-term="subnetting">Subnetting<span class="term-tip">Membagi satu jaringan besar jadi beberapa jaringan kecil yang lebih rapi.</span></button>
+      supaya semuanya tetap teratur meski jaringannya besar.
+    </div>
+
+    <div class="glossary-folder-row">
+      <div class="folder-card-slot">
+        <label class="folder-card">
+          <input type="checkbox" class="folder-toggle" id="glossaryFolderToggle" />
+
+          <div class="hint-wrapper">
+            <span class="hint-text">Klik untuk buka</span>
+            <svg class="hint-arrow" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 35 5 C 35 5, 15 5, 10 25 M 10 25 L 3 18 M 10 25 L 18 22"
+                stroke="#4238C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+
+          <div class="folder-container">
+            <svg class="folder-back" viewBox="0 0 50 40" fill="none">
+              <path d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z" fill="#4238C4"></path>
+            </svg>
+
+            <div class="folder-search">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="glossarySearch" placeholder="Cari istilah..." class="search-input" autocomplete="off" />
+            </div>
+
+            <div class="file file-5" data-slot="5"><div class="shine"></div><div class="file-icon-emoji"></div><div class="file-text"></div><div class="file-tag"></div></div>
+            <div class="file file-4" data-slot="4"><div class="shine"></div><div class="file-icon-emoji"></div><div class="file-text"></div><div class="file-tag"></div></div>
+            <div class="file file-3" data-slot="3"><div class="shine"></div><div class="file-icon-emoji"></div><div class="file-text"></div><div class="file-tag"></div></div>
+            <div class="file file-2" data-slot="2"><div class="shine"></div><div class="file-icon-emoji"></div><div class="file-text"></div><div class="file-tag"></div></div>
+            <div class="file file-1" data-slot="1"><div class="shine"></div><div class="file-icon-emoji"></div><div class="file-text"></div><div class="file-tag"></div></div>
+
+            <div class="folder-front-wrapper">
+              <svg class="folder-front" viewBox="0 0 50 34" fill="none">
+                <path d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z" fill="rgba(91, 79, 232, 0.7)"></path>
+              </svg>
+              <div class="folder-label"></div>
+              <div class="counter">
+                <div class="status-dot"></div>
+                <span class="counter-label">Istilah</span>
+                <span class="counter-number" id="glossaryCounter">20</span>
+              </div>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="card glossary-preview" id="glossaryPreview">
+        <p class="glossary-preview-hint">👆 Klik foldernya untuk buka, lalu klik salah satu kartu istilah untuk lihat penjelasannya di sini.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 5: SUBNET CALCULATOR ============ -->
+<section id="subnet-calculator">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> Modul 04 — Hitung & Lihat</div>
+      <h2>Kalkulator Subnet Visual</h2>
+      <p>Subnetting nggak cuma soal angka biner. Masukkan IP Address dan pilih prefix-nya, lalu lihat bagaimana ruang alamatnya benar-benar terbagi.</p>
+    </div>
+
+    <div class="calc-layout">
+      <div class="card calc-form">
+        <div class="field">
+          <label for="ipInput">IP Address</label>
+          <input type="text" id="ipInput" value="192.168.1.0" inputmode="numeric">
+          <div class="calc-err" id="ipError"></div>
+        </div>
+        <div class="field">
+          <label for="cidrInput">Prefix / CIDR — <span class="cidr-value" id="cidrValue">/24</span></label>
+          <input type="range" id="cidrInput" min="0" max="32" value="24">
+          <div class="cidr-row"><span>/0 (besar)</span><span>/32 (kecil)</span></div>
+        </div>
+        <button class="btn btn-primary" id="btnCalculate" style="width:100%; justify-content:center;">Hitung & Visualisasikan</button>
+      </div>
+
+      <div>
+        <div class="card bitgrid-wrap">
+          <h4>Diagram Pembagian Blok (32-bit)</h4>
+          <div class="bitgrid" id="bitGrid"><!-- injected by JS --></div>
+          <div class="bitgrid-legend">
+            <span><i class="legend-sw" style="background:var(--primary)"></i> Bit Jaringan (Network)</span>
+            <span><i class="legend-sw" style="background:var(--data-tint); border:1.5px solid var(--data);"></i> Bit Host</span>
+          </div>
+        </div>
+        <div class="card result-table">
+          <div class="result-row"><span class="lab">Alamat Jaringan (Network)</span><span class="val" id="resNetwork">—</span></div>
+          <div class="result-row"><span class="lab">Alamat Broadcast</span><span class="val" id="resBroadcast">—</span></div>
+          <div class="result-row"><span class="lab">Subnet Mask</span><span class="val" id="resMask">—</span></div>
+          <div class="result-row"><span class="lab">Host Pertama – Terakhir</span><span class="val" id="resHostRange">—</span></div>
+          <div class="result-row"><span class="lab">Total Host yang Bisa Dipakai</span><span class="val" id="resTotalHosts">—</span></div>
+          <div class="result-row pro-row"><span class="lab">Wildcard Mask</span><span class="val" id="resWildcard">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 7: PROGRESS / SETTINGS ============ -->
+<section id="progres">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> Pengaturan Belajar</div>
+      <h2>Progres & Mode Penjelasan Kamu</h2>
+      <p>Semua modul di atas otomatis tercatat di sini saat kamu mencobanya. Ganti mode penjelasan kapan pun lewat sakelar di pojok kanan atas.</p>
+    </div>
+
+    <div class="progress-layout">
+      <div class="card progress-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <h4 style="margin:0;">Riwayat Modul Selesai</h4>
+          <span class="eyebrow" style="margin:0;" id="progressCount">0/6 selesai</span>
+        </div>
+        <ul class="checklist" id="progressChecklist">
+          <li id="prog-network"><span class="check-mark">✓</span> Berhasil kirim data lewat topologi buatan sendiri</li>
+          <li id="prog-cards"><span class="check-mark">✓</span> Semua kartu analogi dijelajahi</li>
+          <li id="prog-osi"><span class="check-mark">✓</span> Animasi lengkap 7 layer OSI (bungkus & bongkar) terlihat</li>
+          <li id="prog-glossary"><span class="check-mark">✓</span> Glosarium dijelajahi</li>
+          <li id="prog-subnet"><span class="check-mark">✓</span> Kalkulator subnet dicoba</li>
+          <li id="prog-quiz"><span class="check-mark">✓</span> Kuis mini diselesaikan</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="brand-mark"></span> NetFlow</a>
+    <p>Dibuat supaya belajar jaringan komputer nggak lagi bikin ngantuk. © 2026</p>
+  </div>
+</footer>
+
+<script>
+/* ==================================================================
+   DATA
+   ================================================================== */
+const CARD_DATA = [
+  {id:'ip', icon:'🏠', analogyTitle:'Alamat Rumah', analogyText:'Setiap rumah punya alamat unik biar surat sampai ke tempat yang tepat.', term:'IP Address', termText:'Alamat unik yang dimiliki tiap perangkat di jaringan supaya data bisa sampai ke tujuan yang benar.'},
+  {id:'router', icon:'📮', analogyTitle:'Petugas Pos Antar Kompleks', analogyText:'Tahu jalan tercepat mengantar paket ke alamat di kompleks atau kota lain.', term:'Router', termText:'Perangkat yang mengatur rute data antar jaringan yang berbeda.'},
+  {id:'switch', icon:'🏢', analogyTitle:'Resepsionis Kantor', analogyText:'Tahu persis siapa duduk di ruangan mana, jadi kiriman langsung diantar ke meja yang tepat.', term:'Switch', termText:'Perangkat yang menghubungkan banyak perangkat dalam satu jaringan lokal dan meneruskan data ke tujuan yang tepat.'},
+  {id:'bandwidth', icon:'🛣️', analogyTitle:'Lebar Jalan Tol', analogyText:'Jalan yang lebih lebar bisa dilewati lebih banyak mobil sekaligus.', term:'Bandwidth', termText:'Kapasitas maksimum data yang bisa dikirim dalam satu waktu.'},
+  {id:'firewall', icon:'🛡️', analogyTitle:'Satpam Gerbang Kompleks', analogyText:'Memeriksa siapa yang boleh masuk dan siapa yang harus ditolak.', term:'Firewall', termText:'Sistem keamanan yang menyaring data mana yang boleh masuk dan keluar jaringan.'},
+  {id:'dns', icon:'📖', analogyTitle:'Buku Telepon', analogyText:'Kamu ingat nama orang, bukan nomor teleponnya — buku telepon mencarikan nomornya.', term:'DNS', termText:'Sistem yang menerjemahkan nama website menjadi IP Address supaya mudah diingat manusia.'}
+];
+
+const OSI_STEPS = [
+  {layer:7, icon:'💬', lbl:'LAYER 7 — APPLICATION', title:'Kamu Menulis Pesan', text:'Kamu mengetik "Halo!" di aplikasi chat favoritmu. Di titik ini, semuanya masih berupa pesan yang kamu pahami sepenuhnya.', menengah:'Layer ini adalah tempat aplikasi (browser, chat, email) berinteraksi langsung dengan pengguna.', pro:'Contoh protokol: HTTP, HTTPS, FTP, SMTP, DNS.'},
+  {layer:6, icon:'🔤', lbl:'LAYER 6 — PRESENTATION', title:'Pesan Diterjemahkan & Dikemas', text:'Sebelum dikirim, pesanmu diterjemahkan ke format standar, bisa juga dikompres atau dienkripsi supaya aman dan bisa dimengerti perangkat lain.', menengah:'Layer ini menangani format data, enkripsi, dan kompresi.', pro:'Contoh: enkripsi TLS/SSL, format JPEG, ASCII/Unicode encoding.'},
+  {layer:5, icon:'☎️', lbl:'LAYER 5 — SESSION', title:'Membuka Jalur Komunikasi', text:'Aplikasi di kedua sisi membuka semacam "sambungan telepon" khusus, supaya percakapan kalian berdua tidak tercampur dengan obrolan orang lain.', menengah:'Layer ini mengatur, memelihara, dan mengakhiri sesi komunikasi antar dua perangkat.', pro:'Contoh mekanisme: session establishment, checkpointing, NetBIOS.'},
+  {layer:4, icon:'📦', lbl:'LAYER 4 — TRANSPORT', title:'Dipotong Jadi Paket & Diberi Nomor', text:'Pesan yang panjang dipotong jadi paket-paket kecil, masing-masing diberi nomor urut, supaya kalau ada yang hilang di jalan, bisa diminta kirim ulang.', menengah:'Layer ini bertanggung jawab atas keandalan pengiriman: mengurutkan ulang paket dan mendeteksi paket yang hilang.', pro:'Protokol utama: TCP (andal, bernomor urut & acknowledgment) dan UDP (cepat, tanpa jaminan).'},
+  {layer:3, icon:'🗺️', lbl:'LAYER 3 — NETWORK', title:'Diberi Alamat Tujuan', text:'Setiap paket diberi "alamat lengkap" tujuan, supaya router di sepanjang jalan tahu ke mana harus meneruskannya — persis seperti alamat di amplop surat.', menengah:'Layer ini menangani pengalamatan logis (IP Address) dan penentuan rute terbaik antar jaringan.', pro:'Konsep kunci: IP Address, routing table, protokol seperti IP dan ICMP.'},
+  {layer:2, icon:'🏷️', lbl:'LAYER 2 — DATA LINK', title:'Diberi Label Pengirim & Penerima Lokal', text:'Paket diberi "label" versi lokal — alamat fisik perangkat (MAC Address) — supaya switch tahu persis ke perangkat fisik mana paket ini harus diteruskan di dalam satu jaringan.', menengah:'Layer ini menangani pengalamatan fisik (MAC Address) dan deteksi error pada level frame.', pro:'Konsep kunci: MAC Address, frame, switching, protokol Ethernet & Wi-Fi (802.11).'},
+  {layer:1, icon:'⚡', lbl:'LAYER 1 — PHYSICAL', title:'Berubah Jadi Sinyal', text:'Akhirnya, semua data diubah jadi sinyal listrik di kabel tembaga, cahaya di kabel fiber optik, atau gelombang radio di WiFi — lalu benar-benar "mengalir" menuju tujuan.', menengah:'Layer ini adalah media fisik dan sinyal yang membawa data: kabel, konektor, dan frekuensi radio.', pro:'Contoh: kabel UTP/fiber optik, konektor RJ45, spesifikasi sinyal 802.3/802.11.'}
+];
+
+const GLOSSARY_TERMS = [
+  {icon:'🏠', name:'IP Address', def:'Alamat unik tiap perangkat di jaringan, seperti alamat rumah di dunia nyata.'},
+  {icon:'🧩', name:'Subnetting', def:'Membagi satu jaringan besar menjadi beberapa jaringan kecil yang lebih rapi dan efisien.'},
+  {icon:'🛣️', name:'Bandwidth', def:'Kapasitas maksimum data yang bisa dikirim dalam satu waktu, seperti lebar jalan tol.'},
+  {icon:'⏱️', name:'Latency', def:'Waktu tunda antara saat data dikirim dan saat data itu diterima di sisi lain.'},
+  {icon:'📡', name:'Router', def:'Perangkat yang mengatur rute data antar jaringan yang berbeda.'},
+  {icon:'🔀', name:'Switch', def:'Perangkat yang menghubungkan banyak perangkat dalam satu jaringan lokal.'},
+  {icon:'🛡️', name:'Firewall', def:'Sistem keamanan yang menyaring data mana yang boleh masuk dan keluar jaringan.'},
+  {icon:'📖', name:'DNS', def:'Sistem yang menerjemahkan nama website menjadi IP Address.'},
+  {icon:'🏷️', name:'MAC Address', def:'"Nomor seri" fisik unik yang tertanam di kartu jaringan tiap perangkat.'},
+  {icon:'🤝', name:'Protokol', def:'Aturan baku supaya dua perangkat berbeda bisa "berbicara" dalam bahasa yang sama.'},
+  {icon:'🔢', name:'Bit & Byte', def:'Satuan terkecil data digital — 8 bit membentuk 1 byte.'},
+  {icon:'📭', name:'Packet Loss', def:'Kondisi ketika sebagian paket data gagal sampai ke tujuan.'},
+  {icon:'🚪', name:'Gateway', def:'Pintu penghubung yang menjembatani jaringan lokal dengan jaringan luar, seperti internet.'},
+  {icon:'🔄', name:'NAT', def:'Teknologi yang menerjemahkan banyak IP Address lokal jadi satu IP Address publik saat mengakses internet.'},
+  {icon:'🎫', name:'DHCP', def:'Sistem yang otomatis membagikan IP Address ke perangkat baru yang bergabung ke jaringan, tanpa diatur manual.'},
+  {icon:'🔒', name:'VPN', def:'Jalur pribadi terenkripsi di atas jaringan publik, seperti terowongan rahasia lewat internet.'},
+  {icon:'🔌', name:'Port', def:'Nomor "pintu" di sebuah perangkat yang menandai jenis layanan tertentu, misalnya Port 80 untuk website.'},
+  {icon:'🌐', name:'LAN & WAN', def:'LAN adalah jaringan di area kecil seperti satu gedung; WAN menghubungkan jaringan-jaringan itu antar kota atau negara.'},
+  {icon:'🕸️', name:'Topologi Jaringan', def:'Pola bagaimana perangkat-perangkat di jaringan saling terhubung, misalnya bintang, bus, atau cincin.'},
+  {icon:'🔐', name:'Enkripsi', def:'Proses mengacak data supaya hanya pihak yang punya kuncinya yang bisa membacanya.'}
+];
+
+const QUIZ_DATA = [
+  {q:'Apa fungsi utama Router dalam sebuah jaringan?', opts:['Mengatur rute data antar jaringan yang berbeda','Menyimpan file di dalam jaringan','Mengubah nama website jadi IP Address','Memberi warna pada kabel jaringan'], correct:0, explain:' Router bertugas menentukan jalur terbaik supaya data sampai ke jaringan tujuan yang berbeda dari jaringan asal — seperti petugas pos yang tahu rute antar kompleks.'},
+  {q:'IP Address 192.168.1.10 dengan subnet /24 — berapa alamat Network-nya?', opts:['192.168.1.0','192.168.1.255','192.168.0.0','10.0.0.0'], correct:0, explain:' Dengan /24, tiga oktet pertama (192.168.1) adalah bagian jaringan, dan oktet terakhir menjadi 0 untuk alamat Network — jadi hasilnya 192.168.1.0.'},
+  {q:'Layer OSI mana yang bertugas memecah data jadi paket kecil dan menomorinya?', opts:['Transport (Layer 4)','Physical (Layer 1)','Application (Layer 7)','Data Link (Layer 2)'], correct:0, explain:' Transport Layer (Layer 4) memecah data jadi paket-paket kecil, menomorinya, dan memastikan semua paket sampai dengan lengkap — lewat protokol seperti TCP.'}
+];
+
+/* ==================================================================
+   PROGRESS TRACKING
+   ================================================================== */
+const progressState = {network:false, cards:false, osi:false, glossary:false, subnet:false, quiz:false};
+
+function markProgress(key){
+  if(progressState[key]) return;
+  progressState[key] = true;
+  const el = document.getElementById('prog-' + key);
+  if(el) el.classList.add('is-complete');
+  updateProgressCount();
+}
+function updateProgressCount(){
+  const done = Object.values(progressState).filter(Boolean).length;
+  const el = document.getElementById('progressCount');
+  if(el) el.textContent = done + '/6 selesai';
+}
+
+/* ==================================================================
+   MOBILE NAV (hamburger menu)
+   ================================================================== */
+const navHamburger = document.getElementById('navHamburger');
+const mobileNavMenu = document.getElementById('mobileNavMenu');
+function closeMobileNav(){
+  mobileNavMenu.classList.remove('is-open');
+  navHamburger.classList.remove('is-open');
+  navHamburger.setAttribute('aria-expanded', 'false');
+}
+navHamburger.addEventListener('click', ()=>{
+  const isOpen = mobileNavMenu.classList.toggle('is-open');
+  navHamburger.classList.toggle('is-open', isOpen);
+  navHamburger.setAttribute('aria-expanded', String(isOpen));
+});
+mobileNavMenu.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click', closeMobileNav);
+});
+
+/* ==================================================================
+   MODE SWITCH (Pemula / Menengah / Pro)
+   ================================================================== */
+const MODE_DESCRIPTIONS = {
+  pemula: 'Banyak analogi, minim istilah teknis. Cocok kalau baru pertama kali dengar soal jaringan.',
+  menengah: 'Penjelasan standar dengan istilah teknis dasar — cocok untuk siswa/mahasiswa yang sudah familiar.',
+  pro: 'Detail teknis lengkap, termasuk contoh protokol dan perintah CLI untuk yang mau lebih dalam.'
+};
+let modePopoverTimer = null;
+function showModePopover(level){
+  const pop = document.getElementById('modePopover');
+  pop.innerHTML = '<b>' + level + '</b>' + MODE_DESCRIPTIONS[level];
+  pop.classList.add('is-shown');
+  clearTimeout(modePopoverTimer);
+  modePopoverTimer = setTimeout(()=> pop.classList.remove('is-shown'), 4000);
+}
+document.querySelectorAll('#modeSwitch button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#modeSwitch button').forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    document.body.setAttribute('data-mode', btn.dataset.level);
+    showModePopover(btn.dataset.level);
+  });
+});
+
+/* ==================================================================
+   MODULE 1 — KANVAS JARINGAN (topologi bebas + animasi OSI real-time)
+   ================================================================== */
+function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+
+const ICONS = {laptop:'💻', switch:'🔀', router:'📡', server:'🖥️'};
+const LABELS = {laptop:'Laptop', switch:'Switch', router:'Router', server:'Server'};
+const typeCounters = {laptop:0, switch:0, router:0, server:0};
+let deviceIdSeq = 0;
+let canvasDevices = [];
+let canvasConnections = [];
+let interactionMode = 'move'; // 'move' | 'connect' | 'delete'
+let connectFrom = null;
+let kanvasRunning = false;
+let kanvasRunGen = 0;
+
+function deviceById(id){ return canvasDevices.find(d => d.id === id); }
+
+function clearKanvasLog(){
+  document.getElementById('kanvasLog').innerHTML = '<div class="log-line log-empty">Tambahkan perangkat, sambungkan lewat 🔗 Mode Sambung, lalu kirim data untuk melihat animasinya…</div>';
+}
+function addKanvasLog(text, isErr){
+  const log = document.getElementById('kanvasLog');
+  const empty = log.querySelector('.log-empty');
+  if(empty) empty.remove();
+  const div = document.createElement('div');
+  div.className = 'log-line' + (isErr ? ' err' : '');
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function updateKanvasHint(){
+  document.getElementById('kanvasHint').style.display = canvasDevices.length ? 'none' : 'flex';
+}
+
+function updateSendDropdowns(){
+  ['sendFrom','sendTo'].forEach(id=>{
+    const sel = document.getElementById(id);
+    const prevValue = sel.value;
+    sel.innerHTML = '<option value="">' + (id === 'sendFrom' ? 'Dari perangkat...' : 'Ke perangkat...') + '</option>' +
+      canvasDevices.map(d => `<option value="${d.id}">${ICONS[d.type]} ${d.label}</option>`).join('');
+    if(canvasDevices.find(d => d.id === prevValue)) sel.value = prevValue;
+  });
+}
+
+function positionNode(el, device){
+  el.style.left = device.x + 'px';
+  el.style.top = device.y + 'px';
+}
+
+function redrawConnections(){
+  const svg = document.getElementById('kanvasLines');
+  svg.innerHTML = canvasConnections.map(c=>{
+    const a = deviceById(c.a), b = deviceById(c.b);
+    if(!a || !b) return '';
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"></line>`;
+  }).join('');
+}
+
+function toggleConnection(idA, idB){
+  const idx = canvasConnections.findIndex(c => (c.a===idA && c.b===idB) || (c.a===idB && c.b===idA));
+  const devA = deviceById(idA), devB = deviceById(idB);
+  if(idx >= 0){
+    canvasConnections.splice(idx, 1);
+    addKanvasLog(`✂️ Sambungan dihapus: ${devA.label} ↔ ${devB.label}`);
+  } else {
+    canvasConnections.push({a: idA, b: idB});
+    addKanvasLog(`🔗 Tersambung: ${devA.label} ↔ ${devB.label}`);
+  }
+  redrawConnections();
+}
+
+function handleConnectClick(device, el){
+  if(!connectFrom){
+    connectFrom = device;
+    el.classList.add('is-selected');
+    return;
+  }
+  document.querySelectorAll('.kanvas-node.is-selected').forEach(n => n.classList.remove('is-selected'));
+  if(connectFrom.id !== device.id){
+    toggleConnection(connectFrom.id, device.id);
+  }
+  connectFrom = null;
+}
+
+function removeDevice(id){
+  const dev = deviceById(id);
+  if(!dev) return;
+  canvasDevices = canvasDevices.filter(d => d.id !== id);
+  canvasConnections = canvasConnections.filter(c => c.a !== id && c.b !== id);
+  const el = document.querySelector('.kanvas-node[data-id="' + id + '"]');
+  if(el) el.remove();
+  addKanvasLog(`🗑️ ${dev.label} dihapus dari kanvas.`);
+  redrawConnections();
+  updateSendDropdowns();
+  updateKanvasHint();
+}
+
+function attachNodeInteraction(el, device){
+  el.addEventListener('pointerdown', (e)=>{
+    if(interactionMode === 'connect'){ e.preventDefault(); handleConnectClick(device, el); return; }
+    if(interactionMode === 'delete'){ e.preventDefault(); removeDevice(device.id); return; }
+
+    e.preventDefault();
+    const areaEl = document.getElementById('kanvasArea');
+    const areaRect = areaEl.getBoundingClientRect();
+    try { el.setPointerCapture(e.pointerId); } catch(err){}
+
+    function onMove(ev){
+      const x = ev.clientX - areaRect.left;
+      const y = ev.clientY - areaRect.top;
+      device.x = Math.max(28, Math.min(areaRect.width - 28, x));
+      device.y = Math.max(28, Math.min(areaRect.height - 28, y));
+      positionNode(el, device);
+      redrawConnections();
+    }
+    function onUp(ev){
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      try { el.releasePointerCapture(ev.pointerId); } catch(err){}
+    }
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+  });
+}
+
+function renderNode(device){
+  const el = document.createElement('div');
+  el.className = 'kanvas-node';
+  el.dataset.id = device.id;
+  el.innerHTML = `<div class="ic">${ICONS[device.type]}</div><span>${device.label}</span>`;
+  positionNode(el, device);
+  attachNodeInteraction(el, device);
+  document.getElementById('kanvasArea').appendChild(el);
+}
+
+function createDeviceAt(type, x, y){
+  typeCounters[type]++;
+  deviceIdSeq++;
+  const device = {
+    id: 'd' + deviceIdSeq,
+    type,
+    label: LABELS[type] + ' ' + typeCounters[type],
+    x, y
+  };
+  canvasDevices.push(device);
+  renderNode(device);
+  return device;
+}
+
+function addDevice(type){
+  const count = canvasDevices.length;
+  const areaRect = document.getElementById('kanvasArea').getBoundingClientRect();
+  const areaWidth = areaRect.width || 560;
+  const colSpacing = 95;
+  const cols = Math.max(2, Math.floor((areaWidth - 60) / colSpacing));
+  const col = count % cols, row = Math.floor(count / cols);
+  createDeviceAt(type, Math.min(areaWidth - 30, 70 + col * colSpacing), 70 + row * 110);
+  updateSendDropdowns();
+  updateKanvasHint();
+}
+
+function setInteractionMode(mode){
+  interactionMode = (interactionMode === mode) ? 'move' : mode;
+  document.getElementById('btnConnectMode').classList.toggle('is-active', interactionMode === 'connect');
+  document.getElementById('btnDeleteMode').classList.toggle('is-active', interactionMode === 'delete');
+  document.querySelectorAll('.kanvas-node.is-selected').forEach(n => n.classList.remove('is-selected'));
+  connectFrom = null;
+}
+document.getElementById('btnConnectMode').addEventListener('click', ()=> setInteractionMode('connect'));
+document.getElementById('btnDeleteMode').addEventListener('click', ()=> setInteractionMode('delete'));
+document.querySelectorAll('.kanvas-toolbar [data-add]').forEach(btn=>{
+  btn.addEventListener('click', ()=> addDevice(btn.dataset.add));
+});
+
+function findPath(startId, endId){
+  const adj = {};
+  canvasConnections.forEach(c=>{
+    (adj[c.a] = adj[c.a] || []).push(c.b);
+    (adj[c.b] = adj[c.b] || []).push(c.a);
+  });
+  const visited = new Set([startId]);
+  const queue = [[startId]];
+  while(queue.length){
+    const path = queue.shift();
+    const node = path[path.length - 1];
+    if(node === endId) return path;
+    (adj[node] || []).forEach(n=>{
+      if(!visited.has(n)){ visited.add(n); queue.push([...path, n]); }
+    });
+  }
+  return null;
+}
+
+function setSendButtonsEnabled(enabled){
+  document.getElementById('btnSendCanvas').disabled = !enabled;
+}
+function clearCanvasNodeStates(){
+  document.querySelectorAll('.kanvas-node').forEach(n => n.classList.remove('is-active'));
+}
+function placeKanvasPacketAt(device){
+  const packet = document.getElementById('kanvasPacket');
+  packet.style.left = device.x + 'px';
+  packet.style.top = device.y + 'px';
+}
+function resetOsiBars(){
+  document.querySelectorAll('#kanvasOsiStack .osi-bar').forEach(b => {
+    b.classList.remove('is-current','is-done');
+    const stateIcon = b.querySelector('.osi-bar-state');
+    if(stateIcon) stateIcon.textContent = '';
+  });
+}
+function setOsiBarState(layerNum, state){
+  const bar = document.querySelector('#kanvasOsiStack .osi-bar[data-layer="' + layerNum + '"]');
+  if(!bar) return;
+  const stateIcon = bar.querySelector('.osi-bar-state');
+  if(state === 'current'){
+    bar.classList.add('is-current'); bar.classList.remove('is-done');
+    if(stateIcon) stateIcon.textContent = '●';
+  } else {
+    bar.classList.remove('is-current'); bar.classList.add('is-done');
+    if(stateIcon) stateIcon.textContent = '✓';
+  }
+}
+
+async function runCanvasSequence(path){
+  if(kanvasRunning) return;
+  kanvasRunning = true;
+  kanvasRunGen++;
+  const myGen = kanvasRunGen;
+  setSendButtonsEnabled(false);
+  clearCanvasNodeStates();
+  resetOsiBars();
+  clearKanvasLog();
+
+  const fromDevice = deviceById(path[0]);
+  const toDevice = deviceById(path[path.length - 1]);
+  const packet = document.getElementById('kanvasPacket');
+  packet.style.transition = 'none';
+  packet.style.opacity = '1';
+  placeKanvasPacketAt(fromDevice);
+  document.querySelector('.kanvas-node[data-id="' + fromDevice.id + '"]').classList.add('is-active');
+  void packet.offsetWidth;
+  packet.style.transition = '';
+
+  addKanvasLog(`💻 ${fromDevice.label} membungkus data dari Layer 7 (Aplikasi) turun sampai Layer 1 (Fisik)...`);
+  for(const L of [7,6,5,4,3,2,1]){
+    if(myGen !== kanvasRunGen) return;
+    setOsiBarState(L, 'current');
+    await sleep(90);
+    if(myGen !== kanvasRunGen) return;
+    setOsiBarState(L, 'done');
+  }
+
+  for(let i = 1; i < path.length; i++){
+    await sleep(500);
+    if(myGen !== kanvasRunGen) return;
+    const device = deviceById(path[i]);
+    placeKanvasPacketAt(device);
+    clearCanvasNodeStates();
+    document.querySelector('.kanvas-node[data-id="' + device.id + '"]').classList.add('is-active');
+
+    if(i < path.length - 1){
+      if(device.type === 'switch'){
+        addKanvasLog(`🔀 ${device.label} membaca Layer 2 (MAC Address) untuk tahu ke mana meneruskan data.`);
+        setOsiBarState(2, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(2, 'done');
+      } else if(device.type === 'router'){
+        addKanvasLog(`📡 ${device.label} membaca Layer 3 (IP Address) untuk menentukan rute berikutnya.`);
+        setOsiBarState(3, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(3, 'done');
+      } else {
+        addKanvasLog(`↪️ Data melewati ${device.label}.`);
+      }
+    }
+  }
+
+  await sleep(300);
+  if(myGen !== kanvasRunGen) return;
+  addKanvasLog(`🖥️ ${toDevice.label} membongkar data kembali dari Layer 1 sampai Layer 7 — pesan diterima utuh! ✅`);
+  for(const L of [1,2,3,4,5,6,7]){
+    if(myGen !== kanvasRunGen) return;
+    setOsiBarState(L, 'current');
+    await sleep(90);
+    if(myGen !== kanvasRunGen) return;
+    setOsiBarState(L, 'done');
+  }
+  markProgress('network');
+  markProgress('osi');
+  kanvasRunning = false;
+  setSendButtonsEnabled(true);
+}
+
+document.getElementById('btnSendCanvas').addEventListener('click', ()=>{
+  const fromId = document.getElementById('sendFrom').value;
+  const toId = document.getElementById('sendTo').value;
+  if(!fromId || !toId){ addKanvasLog('⚠️ Pilih perangkat asal dan tujuan dulu.', true); return; }
+  if(fromId === toId){ addKanvasLog('⚠️ Pilih dua perangkat yang berbeda.', true); return; }
+  const path = findPath(fromId, toId);
+  if(!path){
+    addKanvasLog('❌ Belum ada jalur ke tujuan itu. Sambungkan dulu perangkatnya lewat 🔗 Mode Sambung.', true);
+    return;
+  }
+  runCanvasSequence(path);
+});
+
+function clearCanvasState(){
+  kanvasRunGen++;
+  kanvasRunning = false;
+  setSendButtonsEnabled(true);
+  canvasDevices = [];
+  canvasConnections = [];
+  interactionMode = 'move';
+  connectFrom = null;
+  typeCounters.laptop = 0;
+  typeCounters.switch = 0;
+  typeCounters.router = 0;
+  typeCounters.server = 0;
+  deviceIdSeq = 0;
+  document.getElementById('btnConnectMode').classList.remove('is-active');
+  document.getElementById('btnDeleteMode').classList.remove('is-active');
+  document.querySelectorAll('.kanvas-node').forEach(n => n.remove());
+  redrawConnections();
+  updateSendDropdowns();
+  updateKanvasHint();
+  resetOsiBars();
+  const packet = document.getElementById('kanvasPacket');
+  packet.style.transition = 'none';
+  packet.style.opacity = '0';
+}
+
+document.getElementById('btnResetCanvas').addEventListener('click', ()=>{
+  clearCanvasState();
+  clearKanvasLog();
+  document.getElementById('kanvasOsiText').textContent = 'Klik salah satu layer di atas untuk lihat penjelasannya, atau kirim data untuk lihat animasinya berjalan otomatis.';
+  document.getElementById('kanvasOsiMenengah').innerHTML = '';
+  document.getElementById('kanvasOsiPro').innerHTML = '';
+});
+
+/* ---- Mode Cepat: template topologi umum ---- */
+function loadTopologyTemplate(name){
+  clearCanvasState();
+  const areaRect = document.getElementById('kanvasArea').getBoundingClientRect();
+  const w = areaRect.width || 560;
+  const h = areaRect.height || 380;
+  const cx = w / 2, cy = h / 2;
+  const clampX = x => Math.max(34, Math.min(w - 34, x));
+  const clampY = y => Math.max(34, Math.min(h - 34, y));
+  let summary = '';
+
+  if(name === 'bus'){
+    const n = 5;
+    const usable = Math.max(160, w - 120);
+    const devices = [];
+    for(let i = 0; i < n; i++){
+      devices.push(createDeviceAt('laptop', clampX(60 + usable * i / (n - 1)), cy));
+    }
+    for(let i = 0; i < n - 1; i++) canvasConnections.push({a: devices[i].id, b: devices[i+1].id});
+    summary = '🚌 Topologi Bus dimuat — 5 perangkat tersambung berurutan lewat satu jalur utama.';
+  }
+  else if(name === 'star'){
+    const center = createDeviceAt('switch', cx, cy);
+    const radius = Math.max(70, Math.min(w, h) / 2 - 55);
+    const n = 4;
+    const devices = [];
+    for(let i = 0; i < n; i++){
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      devices.push(createDeviceAt('laptop', clampX(cx + radius * Math.cos(angle)), clampY(cy + radius * Math.sin(angle))));
+    }
+    devices.forEach(d => canvasConnections.push({a: center.id, b: d.id}));
+    summary = '⭐ Topologi Star dimuat — 4 Laptop semuanya tersambung langsung ke satu Switch pusat.';
+  }
+  else if(name === 'ring'){
+    const n = 5;
+    const radius = Math.max(70, Math.min(w, h) / 2 - 55);
+    const devices = [];
+    for(let i = 0; i < n; i++){
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      devices.push(createDeviceAt('laptop', clampX(cx + radius * Math.cos(angle)), clampY(cy + radius * Math.sin(angle))));
+    }
+    for(let i = 0; i < n; i++) canvasConnections.push({a: devices[i].id, b: devices[(i+1) % n].id});
+    summary = '⭕ Topologi Ring dimuat — 5 perangkat membentuk lingkaran tertutup, saling sambung ke tetangganya.';
+  }
+  else if(name === 'mesh'){
+    const n = 4;
+    const radius = Math.max(70, Math.min(w, h) / 2 - 60);
+    const devices = [];
+    for(let i = 0; i < n; i++){
+      const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      devices.push(createDeviceAt('laptop', clampX(cx + radius * Math.cos(angle)), clampY(cy + radius * Math.sin(angle))));
+    }
+    for(let i = 0; i < n; i++){
+      for(let j = i + 1; j < n; j++) canvasConnections.push({a: devices[i].id, b: devices[j].id});
+    }
+    summary = '🕸️ Topologi Mesh dimuat — semua 4 perangkat saling tersambung langsung, satu ke yang lainnya.';
+  }
+  else if(name === 'tree'){
+    const root = createDeviceAt('router', clampX(cx), clampY(50));
+    const sw1 = createDeviceAt('switch', clampX(cx - w * 0.22), clampY(cy));
+    const sw2 = createDeviceAt('switch', clampX(cx + w * 0.22), clampY(cy));
+    const l1 = createDeviceAt('laptop', clampX(cx - w * 0.34), clampY(h - 50));
+    const l2 = createDeviceAt('laptop', clampX(cx - w * 0.10), clampY(h - 50));
+    const l3 = createDeviceAt('laptop', clampX(cx + w * 0.10), clampY(h - 50));
+    const l4 = createDeviceAt('laptop', clampX(cx + w * 0.34), clampY(h - 50));
+    canvasConnections.push(
+      {a: root.id, b: sw1.id}, {a: root.id, b: sw2.id},
+      {a: sw1.id, b: l1.id}, {a: sw1.id, b: l2.id},
+      {a: sw2.id, b: l3.id}, {a: sw2.id, b: l4.id}
+    );
+    summary = '🌳 Topologi Tree dimuat — 1 Router di puncak bercabang ke 2 Switch, masing-masing ke 2 Laptop.';
+  }
+
+  redrawConnections();
+  updateSendDropdowns();
+  updateKanvasHint();
+  clearKanvasLog();
+  addKanvasLog(summary);
+}
+document.querySelectorAll('.kanvas-templates [data-template]').forEach(btn=>{
+  btn.addEventListener('click', ()=> loadTopologyTemplate(btn.dataset.template));
+});
+
+function renderKanvasOsiStack(){
+  const stack = document.getElementById('kanvasOsiStack');
+  stack.innerHTML = OSI_STEPS.map((s,i) => `
+    <div class="osi-bar" data-index="${i}" data-layer="${s.layer}">
+      <div class="osi-bar-icon">${s.icon}</div>
+      <div class="osi-bar-body">
+        <span class="osi-bar-layer">Layer ${s.layer}</span>
+        <span class="osi-bar-title">${s.title}</span>
+      </div>
+      <div class="osi-bar-state"></div>
+      <div class="osi-bar-sweep"></div>
+    </div>`).join('');
+  stack.querySelectorAll('.osi-bar').forEach(bar=>{
+    bar.addEventListener('click', ()=> showOsiInfo(Number(bar.dataset.index)));
+  });
+}
+function showOsiInfo(index){
+  const s = OSI_STEPS[index];
+  document.getElementById('kanvasOsiText').textContent = 'Layer ' + s.layer + ' — ' + s.title + '. ' + s.text;
+  document.getElementById('kanvasOsiMenengah').innerHTML = '<span class="lab">Detail Menengah</span>' + s.menengah;
+  document.getElementById('kanvasOsiPro').innerHTML = '<span class="lab">Detail Pro</span>' + s.pro;
+}
+
+/* ==================================================================
+   MODULE 2 — FLIP CARDS + GUESS MODE
+   ================================================================== */
+const flippedSet = new Set();
+
+function renderFlipCards(){
+  const grid = document.getElementById('flipCardsGrid');
+  grid.innerHTML = CARD_DATA.map(c => `
+    <div class="flip-card" data-id="${c.id}" tabindex="0" role="button" aria-label="Kartu ${c.term}, klik untuk membalik">
+      <div class="flip-card-inner">
+        <div class="flip-face flip-front">
+          <div>
+            <div class="flip-tag">Dunia Nyata</div>
+            <div class="big-ic">${c.icon}</div>
+            <h4>${c.analogyTitle}</h4>
+            <p>${c.analogyText}</p>
+          </div>
+          <div class="hint-tap">👆 klik untuk balik</div>
+        </div>
+        <div class="flip-face flip-back">
+          <div>
+            <div class="flip-tag">Konsep Jaringan</div>
+            <h4>${c.term}</h4>
+            <p>${c.termText}</p>
+          </div>
+          <div class="hint-tap">👆 klik untuk balik lagi</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  grid.querySelectorAll('.flip-card').forEach(card=>{
+    const toggle = ()=>{
+      card.classList.toggle('is-flipped');
+      flippedSet.add(card.dataset.id);
+      if(flippedSet.size >= CARD_DATA.length) markProgress('cards');
+    };
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+    });
+  });
+}
+
+function shuffleArr(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+let guessCurrentCard = null;
+let guessRoundsCompleted = 0;
+
+function newGuessRound(){
+  guessCurrentCard = CARD_DATA[Math.floor(Math.random() * CARD_DATA.length)];
+  document.getElementById('guessPrompt').innerHTML = `
+    <div class="big-ic">${guessCurrentCard.icon}</div>
+    <h4>${guessCurrentCard.analogyTitle}</h4>
+    <p>${guessCurrentCard.analogyText}</p>`;
+
+  const others = shuffleArr(CARD_DATA.filter(c => c.id !== guessCurrentCard.id));
+  const optionCards = shuffleArr([guessCurrentCard, ...others.slice(0,3)]);
+  document.getElementById('guessOptions').innerHTML = optionCards.map(c =>
+    `<button class="btn btn-ghost guess-opt" data-id="${c.id}">${c.term}</button>`).join('');
+  document.getElementById('guessFeedback').textContent = '';
+  document.getElementById('guessNextBtn').classList.add('hidden');
+
+  document.querySelectorAll('.guess-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.disabled) return;
+      document.querySelectorAll('.guess-opt').forEach(b => b.disabled = true);
+      const fb = document.getElementById('guessFeedback');
+      if(btn.dataset.id === guessCurrentCard.id){
+        btn.classList.add('correct');
+        fb.textContent = '✅ Tepat! ' + guessCurrentCard.termText;
+      } else {
+        btn.classList.add('wrong');
+        document.querySelectorAll('.guess-opt').forEach(b=>{
+          if(b.dataset.id === guessCurrentCard.id) b.classList.add('correct');
+        });
+        fb.textContent = '❌ Belum tepat. ' + guessCurrentCard.termText;
+      }
+      guessRoundsCompleted++;
+      if(guessRoundsCompleted >= CARD_DATA.length) markProgress('cards');
+      document.getElementById('guessNextBtn').classList.remove('hidden');
+    });
+  });
+}
+document.getElementById('guessNextBtn').addEventListener('click', newGuessRound);
+
+const cardModeButtons = {
+  jelajah: document.getElementById('modeJelajahBtn'),
+  tebak: document.getElementById('modeTebakBtn'),
+  kuis: document.getElementById('modeKuisBtn')
+};
+const cardModeBoxes = {
+  jelajah: document.getElementById('jelajahBox'),
+  tebak: document.getElementById('guessBox'),
+  kuis: document.getElementById('quizBox')
+};
+function setCardMode(mode){
+  Object.keys(cardModeButtons).forEach(key=>{
+    const isActive = key === mode;
+    cardModeButtons[key].classList.toggle('is-active', isActive);
+    cardModeButtons[key].classList.toggle('btn-primary', isActive);
+    cardModeButtons[key].classList.toggle('btn-ghost', !isActive);
+    cardModeBoxes[key].classList.toggle('hidden', !isActive);
+  });
+  if(mode === 'tebak' && !guessCurrentCard) newGuessRound();
+}
+cardModeButtons.jelajah.addEventListener('click', ()=> setCardMode('jelajah'));
+cardModeButtons.tebak.addEventListener('click', ()=> setCardMode('tebak'));
+cardModeButtons.kuis.addEventListener('click', ()=> setCardMode('kuis'));
+
+/* ==================================================================
+   MODULE 4 — GLOSSARY (folder-card)
+   ================================================================== */
+const GLOSSARY_MAX_SLOTS = 5;
+
+function renderGlossaryFolder(query){
+  const q = (query || '').trim().toLowerCase();
+  const matches = GLOSSARY_TERMS.filter(t => t.name.toLowerCase().includes(q) || t.def.toLowerCase().includes(q));
+  document.getElementById('glossaryCounter').textContent = String(matches.length).padStart(2, '0');
+
+  for(let slot = 1; slot <= GLOSSARY_MAX_SLOTS; slot++){
+    const el = document.querySelector('.file[data-slot="' + slot + '"]');
+    const term = matches[slot - 1];
+    if(term){
+      el.style.display = '';
+      el.querySelector('.file-icon-emoji').textContent = term.icon;
+      el.querySelector('.file-text').textContent = term.name;
+      el.querySelector('.file-tag').textContent = 'Klik untuk lihat arti';
+      el.dataset.termName = term.name;
+    } else {
+      el.style.display = 'none';
+      el.dataset.termName = '';
+    }
+  }
+
+  const previewEl = document.getElementById('glossaryPreview');
+  const existingMore = previewEl.querySelector('.glossary-preview-more');
+  if(existingMore) existingMore.remove();
+  if(matches.length > GLOSSARY_MAX_SLOTS){
+    const moreEl = document.createElement('p');
+    moreEl.className = 'glossary-preview-more';
+    moreEl.textContent = `+ ${matches.length - GLOSSARY_MAX_SLOTS} istilah lainnya — ketik lebih spesifik di kotak pencarian untuk mempersempit.`;
+    previewEl.appendChild(moreEl);
+  }
+}
+
+document.querySelectorAll('.folder-card .file').forEach(fileEl=>{
+  fileEl.addEventListener('click', (e)=>{
+    e.preventDefault(); // stop the label from also toggling the folder closed
+    const name = fileEl.dataset.termName;
+    const term = GLOSSARY_TERMS.find(t => t.name === name);
+    if(!term) return;
+    const previewEl = document.getElementById('glossaryPreview');
+    previewEl.innerHTML = `<div class="glossary-preview-icon">${term.icon}</div><h4>${term.name}</h4><p>${term.def}</p>`;
+    markProgress('glossary');
+  });
+});
+
+document.getElementById('glossarySearch').addEventListener('input', e=>{
+  renderGlossaryFolder(e.target.value);
+  markProgress('glossary');
+});
+document.getElementById('glossaryFolderToggle').addEventListener('change', function(){
+  if(this.checked) renderGlossaryFolder(document.getElementById('glossarySearch').value);
+});
+
+document.querySelectorAll('.term-btn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const wasOpen = btn.classList.contains('is-open');
+    document.querySelectorAll('.term-btn.is-open').forEach(b => b.classList.remove('is-open'));
+    if(!wasOpen) btn.classList.add('is-open');
+    markProgress('glossary');
+  });
+});
+document.addEventListener('click', ()=>{
+  document.querySelectorAll('.term-btn.is-open').forEach(b => b.classList.remove('is-open'));
+});
+
+/* ==================================================================
+   MODULE 5 — SUBNET CALCULATOR
+   ================================================================== */
+function toIpStr(n){
+  return [(n>>>24)&255, (n>>>16)&255, (n>>>8)&255, n&255].join('.');
+}
+function renderBitGrid(maskNum){
+  const grid = document.getElementById('bitGrid');
+  grid.innerHTML = '';
+  for(let octet = 0; octet < 4; octet++){
+    const label = document.createElement('div');
+    label.className = 'bit-octet-label';
+    label.textContent = 'Oktet ' + (octet+1);
+    grid.appendChild(label);
+    for(let bit = 0; bit < 8; bit++){
+      const bitPos = 31 - (octet*8 + bit);
+      const isNet = ((maskNum >>> bitPos) & 1) === 1;
+      const cell = document.createElement('div');
+      cell.className = 'bit-cell ' + (isNet ? 'net' : 'host');
+      grid.appendChild(cell);
+    }
+  }
+}
+function calcSubnet(){
+  const ipStr = document.getElementById('ipInput').value.trim();
+  const cidr = parseInt(document.getElementById('cidrInput').value, 10);
+  document.getElementById('cidrValue').textContent = '/' + cidr;
+  const errEl = document.getElementById('ipError');
+  const parts = ipStr.split('.');
+  const invalid = parts.length !== 4 || parts.some(p => !/^\d{1,3}$/.test(p) || Number(p) > 255);
+  if(invalid){
+    errEl.textContent = 'Format IP tidak valid. Gunakan format seperti 192.168.1.0';
+    return;
+  }
+  errEl.textContent = '';
+  const ipNum = (parts.reduce((acc,p) => (acc*256) + Number(p), 0)) >>> 0;
+  const maskNum = cidr === 0 ? 0 : (0xFFFFFFFF << (32 - cidr)) >>> 0;
+  const networkNum = (ipNum & maskNum) >>> 0;
+  const broadcastNum = (networkNum | (~maskNum >>> 0)) >>> 0;
+  const totalAddresses = Math.pow(2, 32 - cidr);
+
+  let usable, first, last;
+  if(cidr >= 31){
+    usable = cidr === 32 ? 1 : 2;
+    first = networkNum;
+    last = broadcastNum;
+  } else {
+    usable = totalAddresses - 2;
+    first = networkNum + 1;
+    last = broadcastNum - 1;
+  }
+
+  document.getElementById('resNetwork').textContent = toIpStr(networkNum);
+  document.getElementById('resBroadcast').textContent = cidr >= 31 ? '—' : toIpStr(broadcastNum);
+  document.getElementById('resMask').textContent = toIpStr(maskNum);
+  document.getElementById('resHostRange').textContent = usable > 0 ? (toIpStr(first) + ' – ' + toIpStr(last)) : '—';
+  document.getElementById('resTotalHosts').textContent = usable.toLocaleString('id-ID');
+  document.getElementById('resWildcard').textContent = toIpStr((~maskNum) >>> 0);
+  renderBitGrid(maskNum);
+  markProgress('subnet');
+}
+document.getElementById('btnCalculate').addEventListener('click', calcSubnet);
+document.getElementById('cidrInput').addEventListener('input', calcSubnet);
+document.getElementById('ipInput').addEventListener('input', calcSubnet);
+
+/* ==================================================================
+   MODULE 6 — QUIZ
+   ================================================================== */
+const quizState = {currentQ:0, score:0, answered:false};
+
+function buildQuizDots(){
+  document.getElementById('quizProgress').innerHTML = QUIZ_DATA.map(()=>'<div class="quiz-dot"></div>').join('');
+}
+function updateQuizDots(){
+  document.querySelectorAll('.quiz-dot').forEach((d,i)=>{
+    d.classList.remove('is-done','is-current');
+    if(i < quizState.currentQ) d.classList.add('is-done');
+    else if(i === quizState.currentQ) d.classList.add('is-current');
+  });
+}
+function renderQuiz(){
+  updateQuizDots();
+  if(quizState.currentQ >= QUIZ_DATA.length){
+    document.getElementById('quizBody').classList.add('hidden');
+    document.getElementById('quizSummary').classList.add('is-shown');
+    document.getElementById('quizScore').textContent = quizState.score + '/' + QUIZ_DATA.length;
+    let msg;
+    if(quizState.score === QUIZ_DATA.length) msg = 'Keren, kamu paham betul konsep-konsep di atas! 🎉';
+    else if(quizState.score > 0) msg = 'Lumayan! Coba lihat lagi bagian yang belum pas, lalu ulangi kuisnya.';
+    else msg = 'Belum apa-apa — coba pelajari lagi modul di atas, lalu ulangi kuisnya.';
+    document.getElementById('quizSummaryText').textContent = msg;
+    markProgress('quiz');
+    return;
+  }
+  document.getElementById('quizBody').classList.remove('hidden');
+  document.getElementById('quizSummary').classList.remove('is-shown');
+  quizState.answered = false;
+  const q = QUIZ_DATA[quizState.currentQ];
+  document.getElementById('quizQuestion').textContent = q.q;
+  document.getElementById('quizOpts').innerHTML = q.opts.map((opt,idx) =>
+    `<button class="btn btn-ghost quiz-opt" data-idx="${idx}" style="justify-content:flex-start;">${opt}</button>`).join('');
+  document.getElementById('quizExplain').classList.remove('is-shown');
+  document.getElementById('quizNextBtn').classList.add('hidden');
+
+  document.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(quizState.answered) return;
+      quizState.answered = true;
+      const idx = Number(btn.dataset.idx);
+      document.querySelectorAll('.quiz-opt').forEach(b=>{
+        if(Number(b.dataset.idx) === q.correct) b.classList.add('correct');
+      });
+      if(idx === q.correct){ quizState.score++; } else { btn.classList.add('wrong'); }
+      const explain = document.getElementById('quizExplain');
+      explain.innerHTML = '<b>' + (idx === q.correct ? '✅ Benar!' : '❌ Belum tepat.') + '</b>' + q.explain;
+      explain.classList.add('is-shown');
+      const nextBtn = document.getElementById('quizNextBtn');
+      nextBtn.classList.remove('hidden');
+      nextBtn.textContent = quizState.currentQ === QUIZ_DATA.length - 1 ? 'Lihat Hasil →' : 'Lanjut →';
+    });
+  });
+}
+document.getElementById('quizNextBtn').addEventListener('click', ()=>{ quizState.currentQ++; renderQuiz(); });
+document.getElementById('quizRestartBtn').addEventListener('click', ()=>{ quizState.currentQ = 0; quizState.score = 0; renderQuiz(); });
+
+/* ==================================================================
+   INIT
+   ================================================================== */
+renderFlipCards();
+renderKanvasOsiStack();
+updateKanvasHint();
+renderGlossaryFolder('');
+calcSubnet();
+buildQuizDots();
+renderQuiz();
+updateProgressCount();
+</script>
+</body>
+</html>
