@@ -423,9 +423,15 @@ section{padding:96px 0;}
 .folder-toggle:checked ~ .folder-container .folder-search:focus-within{ width:95%; }
 
 /* ============ MODULE 5: SUBNET CALC ============ */
-.calc-layout{display:grid; grid-template-columns:1fr 1.25fr; gap:28px; align-items:start;}
-@media (max-width:760px){ .calc-layout{grid-template-columns:1fr;} }
+.calc-layout{display:flex; flex-direction:column; gap:24px;}
 .calc-form{padding:30px;}
+.calc-form-row{display:grid; grid-template-columns:1.1fr 1.3fr auto; gap:24px; align-items:start;}
+@media (max-width:760px){ .calc-form-row{grid-template-columns:1fr;} }
+.calc-form-row .field{margin-bottom:0;}
+.calc-form-row .btn{margin-top:26px; white-space:nowrap;}
+@media (max-width:760px){ .calc-form-row .btn{width:100%; justify-content:center; margin-top:4px;} }
+.calc-results-row{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;}
+@media (max-width:760px){ .calc-results-row{grid-template-columns:1fr;} }
 .field{margin-bottom:22px;}
 .field label{display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);}
 .field input[type=text]{
@@ -828,20 +834,22 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
 
     <div class="calc-layout">
       <div class="card calc-form">
-        <div class="field">
-          <label for="ipInput">IP Address</label>
-          <input type="text" id="ipInput" value="192.168.1.0" inputmode="numeric">
-          <div class="calc-err" id="ipError"></div>
+        <div class="calc-form-row">
+          <div class="field">
+            <label for="ipInput">IP Address</label>
+            <input type="text" id="ipInput" value="192.168.1.0" inputmode="numeric">
+            <div class="calc-err" id="ipError"></div>
+          </div>
+          <div class="field">
+            <label for="cidrInput">Prefix / CIDR — <span class="cidr-value" id="cidrValue">/24</span></label>
+            <input type="range" id="cidrInput" min="0" max="32" value="24">
+            <div class="cidr-row"><span>/0 (besar)</span><span>/32 (kecil)</span></div>
+          </div>
+          <button class="btn btn-primary" id="btnCalculate">Hitung & Visualisasikan</button>
         </div>
-        <div class="field">
-          <label for="cidrInput">Prefix / CIDR — <span class="cidr-value" id="cidrValue">/24</span></label>
-          <input type="range" id="cidrInput" min="0" max="32" value="24">
-          <div class="cidr-row"><span>/0 (besar)</span><span>/32 (kecil)</span></div>
-        </div>
-        <button class="btn btn-primary" id="btnCalculate" style="width:100%; justify-content:center;">Hitung & Visualisasikan</button>
       </div>
 
-      <div>
+      <div class="calc-results-row">
         <div class="card bitgrid-wrap">
           <h4>Diagram Pembagian Blok (32-bit)</h4>
           <div class="bitgrid" id="bitGrid"><!-- injected by JS --></div>
