@@ -175,10 +175,14 @@ section{padding:96px 0;}
   100%{left:0; opacity:0;}
 }
 .hero-caption{margin-top:22px; font-size:13px; color:var(--muted); font-family:var(--font-mono); text-align:center; position:relative; z-index:2;}
+.hero-stats{display:flex; justify-content:space-around; margin-top:20px; padding-top:20px; border-top:1px dashed var(--line); position:relative; z-index:2;}
+.hero-stat{display:flex; flex-direction:column; align-items:center; gap:2px;}
+.hero-stat-num{font-family:var(--font-display); font-weight:800; font-size:21px; color:var(--primary-ink);}
+.hero-stat-label{font-size:10.5px; color:var(--muted); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.04em;}
 
 /* ============ MODULE 1: KANVAS JARINGAN ============ */
-.kanvas-layout{display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:start;}
-@media (max-width:900px){ .kanvas-layout{grid-template-columns:1fr;} .hero .wrap{grid-template-columns:1fr;} }
+.kanvas-layout{display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:stretch;}
+@media (max-width:760px){ .kanvas-layout{grid-template-columns:1fr;} .hero .wrap{grid-template-columns:1fr;} }
 .kanvas-main{padding:28px;}
 .kanvas-toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
 .kanvas-templates{
@@ -233,7 +237,26 @@ section{padding:96px 0;}
 .network-log .log-line:last-child{border-bottom:none; color:var(--ink); font-weight:600;}
 .network-log .log-line.err{color:#B8391E;}
 .network-log .log-empty{color:var(--muted); font-style:italic;}
-.kanvas-osi-panel{padding:28px;}
+.kanvas-osi-panel{padding:28px; display:flex; flex-direction:column;}
+.kanvas-missions{margin-top:24px; padding:28px;}
+.kanvas-missions-head{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:6px;}
+.kanvas-missions-head h4{margin:0;}
+.kanvas-missions-sub{color:var(--muted); font-size:13.5px; margin:0 0 18px;}
+.mission-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+.mission-item{
+  display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:var(--radius-sm);
+  border:1.5px solid var(--line); transition:all .3s ease;
+}
+.mission-item.is-complete{border-color:var(--data); background:var(--data-tint);}
+.mission-check{
+  flex:none; width:24px; height:24px; margin-top:1px; border-radius:50%; border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; transition:all .3s ease;
+}
+.mission-item.is-complete .mission-check{background:var(--data); border-color:var(--data); color:#fff;}
+.mission-body{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.mission-title{font-weight:700; font-size:14px; color:var(--ink);}
+.mission-item.is-complete .mission-title{color:#0A7A56;}
+.mission-desc{font-size:13px; color:var(--muted);}
 .osi-stack{display:flex; flex-direction:column; gap:8px;}
 .osi-bar{
   position:relative; padding:10px 12px; border-radius:14px; background:var(--surface); border:1.5px solid var(--line);
@@ -401,7 +424,7 @@ section{padding:96px 0;}
 
 /* ============ MODULE 5: SUBNET CALC ============ */
 .calc-layout{display:grid; grid-template-columns:1fr 1.25fr; gap:28px; align-items:start;}
-@media (max-width:900px){ .calc-layout{grid-template-columns:1fr;} }
+@media (max-width:760px){ .calc-layout{grid-template-columns:1fr;} }
 .calc-form{padding:30px;}
 .field{margin-bottom:22px;}
 .field label{display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);}
@@ -416,7 +439,7 @@ section{padding:96px 0;}
 
 .bitgrid-wrap{padding:26px 30px; margin-bottom:20px;}
 .bitgrid-wrap h4{font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:16px;}
-.bitgrid{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-bottom:10px;}
+.bitgrid{display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin:0 auto 10px; max-width:340px;}
 .bit-octet-label{grid-column:span 8; font-family:var(--font-mono); font-size:11px; color:var(--muted); margin:6px 0 2px;}
 .bit-cell{aspect-ratio:1; border-radius:5px; background:var(--bg-deep);}
 .bit-cell.net{background:var(--primary);}
@@ -465,7 +488,7 @@ body[data-mode="pemula"] .mode-hint{ display:block; }
 .quiz-summary p{color:var(--muted);}
 
 /* ============ MODULE 7: PROGRESS ============ */
-.progress-layout{display:grid; grid-template-columns:1fr; max-width:640px;}
+.progress-layout{display:grid; grid-template-columns:1fr; max-width:640px; margin:0 auto;}
 .progress-card{padding:30px;}
 .checklist{list-style:none; margin:0; padding:0;}
 .checklist li{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14.5px; font-weight:600; color:var(--muted);}
@@ -489,13 +512,15 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
   .hero{padding:40px 0 32px;}
   .hero-cta{margin-top:22px;}
   .quiz-card{padding:24px;}
-  .osi-story-card, .kanvas-main, .kanvas-osi-panel, .calc-form, .bitgrid-wrap, .result-table{padding:20px;}
+  .osi-story-card, .kanvas-main, .kanvas-osi-panel, .kanvas-missions, .calc-form, .bitgrid-wrap, .result-table{padding:20px;}
   .kanvas-area{min-width:100%;}
   .folder-card-slot{padding-top:64px; padding-right:10px;}
   .hint-wrapper{top:-28px; right:-6px;}
   .counter{top:-64px; right:-10px;}
   .glossary-folder-row{justify-content:center;}
   .folder-card-slot{display:flex; justify-content:center;}
+  .kanvas-send-row{flex-direction:column; align-items:stretch;}
+  .kanvas-send-row span{text-align:center;}
 }
 @media (max-width:400px){
   .hero-node{width:52px;}
@@ -505,6 +530,22 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
   .site-nav .wrap{padding:12px 16px;}
   .mode-switch button{padding:6px 9px; font-size:11px;}
   .brand{font-size:17px;}
+}
+
+/* Short viewports (typically a phone in landscape) — compact vertical
+   rhythm based on available HEIGHT, independent of width, since a
+   landscape phone can be 650-930px wide but only ~350-430px tall. */
+@media (max-height:500px) and (orientation:landscape){
+  .site-nav .wrap{padding:8px 24px;}
+  section{padding:32px 0;}
+  .hero{padding:20px 0 18px;}
+  .hero-cta{margin-top:16px;}
+  .hero-note{margin-top:12px;}
+  .quiz-card{padding:18px;}
+  .osi-story-card, .kanvas-main, .kanvas-osi-panel, .kanvas-missions, .calc-form, .bitgrid-wrap, .result-table{padding:16px;}
+  .kanvas-area{height:220px;}
+  .kanvas-toolbar, .kanvas-templates{margin-bottom:10px; padding-bottom:10px;}
+  .section-head{margin-bottom:24px;}
 }
 </style>
 </head>
@@ -567,6 +608,11 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
           <div class="hero-node"><div class="ic">🖥️</div><span>Server</span></div>
         </div>
         <div class="hero-caption">// begitulah data kamu berjalan — coba sendiri di bawah</div>
+        <div class="hero-stats">
+          <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Topologi</span></div>
+          <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-label">Layer OSI</span></div>
+          <div class="hero-stat"><span class="hero-stat-num">20</span><span class="hero-stat-label">Istilah</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -632,6 +678,15 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
           <div class="detail-box pro-box detail-pro" id="kanvasOsiPro"></div>
         </div>
       </div>
+    </div>
+
+    <div class="card kanvas-missions">
+      <div class="kanvas-missions-head">
+        <h4>🎯 Misi Kanvas</h4>
+        <span class="eyebrow" style="margin:0;" id="missionCounter">0/5 misi selesai</span>
+      </div>
+      <p class="kanvas-missions-sub">Tantangan singkat langsung di kanvas atas — otomatis tercentang begitu syaratnya terpenuhi, tidak perlu tombol cek.</p>
+      <ul class="mission-list" id="missionList"><!-- injected by JS --></ul>
     </div>
   </div>
 </section>
@@ -897,6 +952,68 @@ const QUIZ_DATA = [
   {q:'Layer OSI mana yang bertugas memecah data jadi paket kecil dan menomorinya?', opts:['Transport (Layer 4)','Physical (Layer 1)','Application (Layer 7)','Data Link (Layer 2)'], correct:0, explain:' Transport Layer (Layer 4) memecah data jadi paket-paket kecil, menomorinya, dan memastikan semua paket sampai dengan lengkap — lewat protokol seperti TCP.'}
 ];
 
+const MISSIONS = [
+  {id:'basic-link', title:'Sambungan Pertama', desc:'Tambahkan minimal 1 Laptop dan 1 Server, lalu sambungkan keduanya secara langsung lewat 🔗 Mode Sambung.'},
+  {id:'star-hub', title:'Pusat Bintang', desc:'Buat 1 Switch yang tersambung ke minimal 3 perangkat lain — itulah cikal-bakal topologi Star.'},
+  {id:'through-router', title:'Lewat Router', desc:'Berhasil kirim data yang melewati Router setidaknya sekali.'},
+  {id:'see-error', title:'Kenali Kegagalan', desc:'Coba kirim data ke perangkat yang belum tersambung, dan lihat pesan errornya muncul.'},
+  {id:'tree-master', title:'Arsitek Tree', desc:'Bangun topologi berjenjang: minimal 1 Router, 2 Switch, dan 2 Laptop, lalu berhasil kirim data lewat Router.'}
+];
+const missionState = {basicLink:false, starHub:false, throughRouter:false, sawError:false, treeMaster:false, celebrated:false};
+
+function renderMissionList(){
+  const list = document.getElementById('missionList');
+  list.innerHTML = MISSIONS.map(m => `
+    <li class="mission-item" data-mission="${m.id}">
+      <span class="mission-check">✓</span>
+      <div class="mission-body">
+        <span class="mission-title">${m.title}</span>
+        <span class="mission-desc">${m.desc}</span>
+      </div>
+    </li>`).join('');
+}
+
+function updateMissionUI(){
+  const map = {
+    'basic-link': missionState.basicLink,
+    'star-hub': missionState.starHub,
+    'through-router': missionState.throughRouter,
+    'see-error': missionState.sawError,
+    'tree-master': missionState.treeMaster
+  };
+  let done = 0;
+  Object.keys(map).forEach(id=>{
+    const el = document.querySelector('.mission-item[data-mission="' + id + '"]');
+    if(el) el.classList.toggle('is-complete', !!map[id]);
+    if(map[id]) done++;
+  });
+  const counter = document.getElementById('missionCounter');
+  if(counter) counter.textContent = done + '/' + MISSIONS.length + ' misi selesai';
+  if(done === MISSIONS.length && !missionState.celebrated){
+    missionState.celebrated = true;
+    addKanvasLog('🎉 Semua misi kanvas selesai! Kamu sudah paham dasar-dasar membangun topologi jaringan.');
+  }
+}
+
+function evaluateStructuralMissions(){
+  if(!missionState.basicLink){
+    const found = canvasConnections.some(c=>{
+      const a = deviceById(c.a), b = deviceById(c.b);
+      if(!a || !b) return false;
+      return (a.type === 'laptop' && b.type === 'server') || (a.type === 'server' && b.type === 'laptop');
+    });
+    if(found) missionState.basicLink = true;
+  }
+  if(!missionState.starHub){
+    const found = canvasDevices.filter(d => d.type === 'switch').some(sw=>{
+      const degree = canvasConnections.filter(c => c.a === sw.id || c.b === sw.id).length;
+      return degree >= 3;
+    });
+    if(found) missionState.starHub = true;
+  }
+  updateMissionUI();
+}
+
 /* ==================================================================
    PROGRESS TRACKING
    ================================================================== */
@@ -1028,6 +1145,7 @@ function toggleConnection(idA, idB){
   } else {
     canvasConnections.push({a: idA, b: idB});
     addKanvasLog(`🔗 Tersambung: ${devA.label} ↔ ${devB.label}`);
+    evaluateStructuralMissions();
   }
   redrawConnections();
 }
@@ -1247,6 +1365,18 @@ async function runCanvasSequence(path){
   }
   markProgress('network');
   markProgress('osi');
+
+  const pathDevices = path.map(id => deviceById(id));
+  const wentThroughRouter = pathDevices.some(d => d && d.type === 'router');
+  if(wentThroughRouter){
+    missionState.throughRouter = true;
+    const routerCount = canvasDevices.filter(d => d.type === 'router').length;
+    const switchCount = canvasDevices.filter(d => d.type === 'switch').length;
+    const laptopCount = canvasDevices.filter(d => d.type === 'laptop').length;
+    if(routerCount >= 1 && switchCount >= 2 && laptopCount >= 2) missionState.treeMaster = true;
+  }
+  updateMissionUI();
+
   kanvasRunning = false;
   setSendButtonsEnabled(true);
 }
@@ -1259,6 +1389,8 @@ document.getElementById('btnSendCanvas').addEventListener('click', ()=>{
   const path = findPath(fromId, toId);
   if(!path){
     addKanvasLog('❌ Belum ada jalur ke tujuan itu. Sambungkan dulu perangkatnya lewat 🔗 Mode Sambung.', true);
+    missionState.sawError = true;
+    updateMissionUI();
     return;
   }
   runCanvasSequence(path);
@@ -1370,6 +1502,7 @@ function loadTopologyTemplate(name){
     summary = '🌳 Topologi Tree dimuat — 1 Router di puncak bercabang ke 2 Switch, masing-masing ke 2 Laptop.';
   }
 
+  evaluateStructuralMissions();
   redrawConnections();
   updateSendDropdowns();
   updateKanvasHint();
@@ -1715,6 +1848,7 @@ document.getElementById('quizRestartBtn').addEventListener('click', ()=>{ quizSt
 /* ==================================================================
    INIT
    ================================================================== */
+renderMissionList();
 renderFlipCards();
 renderKanvasOsiStack();
 updateKanvasHint();
