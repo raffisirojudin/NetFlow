@@ -2,19 +2,22 @@
 
 **NetFlow** adalah platform belajar jaringan komputer yang mengubah materi yang biasanya berat dan penuh istilah teknis jadi pengalaman visual, interaktif, dan bisa dicoba sendiri — bukan cuma dibaca. Dibangun sebagai **satu file HTML mandiri**, tanpa instalasi, tanpa server backend, tanpa build step.
 
+🔗 **Live demo:** _tambahkan link GitHub Pages di sini setelah deploy_
+
 ---
 
 ## ✨ Fitur Utama
 
 ### 🖧 Kanvas Jaringan
-Bangun topologi jaringan sendiri lewat drag & drop — tambah Laptop, Switch, Router, atau Server, sambungkan kabelnya sendiri, lalu kirim data dan lihat animasi tiap lapisan OSI aktif secara real-time (dibungkus di pengirim, dibaca di tiap hop, dibongkar di penerima).
+Bangun topologi jaringan sendiri lewat drag & drop — tambah Laptop, Switch, Router, Server, atau **Firewall**, sambungkan kabelnya sendiri, lalu kirim data dan lihat animasi tiap lapisan OSI aktif secara real-time (dibungkus di pengirim, dibaca di tiap hop, dibongkar di penerima).
 
 - **Mode Cepat** — muat topologi klasik (Bus, Star, Ring, Mesh, Tree) sekali klik
-- **Misi Kanvas** — 5 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
+- **Firewall sungguhan** — klik untuk atur aturan blokir dari perangkat tertentu, lalu buktikan sendiri data dari sumber itu benar-benar ditolak, sementara sumber lain tetap lolos
+- **Misi Kanvas** — 6 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
 - Error yang jujur — kalau dua perangkat belum tersambung, pengiriman data akan gagal beneran, bukan skenario yang di-skrip
 
 ### 🃏 Kartu Analogi
-Istilah jaringan dipasangkan dengan analogi dunia nyata (Router = petugas pos, Switch = resepsionis kantor, DNS = buku telepon, dst) dalam kartu yang bisa dibalik. Tiga mode dalam satu tempat: **Jelajah Bebas**, **Tebak Konsep**, dan **Kuis Mini**.
+Istilah jaringan dipasangkan dengan analogi dunia nyata (Router = petugas pos, Switch = resepsionis kantor, DNS = buku telepon, dst) dalam **14 kartu** yang bisa dibalik. Tiga mode dalam satu tempat: **Jelajah Bebas**, **Tebak Konsep**, dan **Kuis Mini** — kuisnya menarik 5 soal acak dari bank berisi 10 soal setiap kali dicoba (urutan jawaban juga diacak), jadi tiap percobaan terasa beda.
 
 ### 📖 Glosarium
 Kamus 20 istilah jaringan, dikemas dalam widget folder yang bisa diklik untuk membuka pencarian instan — bukan grid panjang yang bikin capek scroll.
@@ -70,7 +73,6 @@ Unduh `index.html`, buka langsung di browser mana saja. Tidak perlu `npm install
 
 Beberapa ide yang sedang dipertimbangkan untuk pengembangan lanjutan:
 
-- Perangkat **Firewall** yang bisa benar-benar ditaruh di Kanvas dan menolak data dari sumber tertentu
 - Catatan kelebihan/kekurangan tiap topologi saat dimuat lewat Mode Cepat
 - Halaman ringkasan/"sertifikat" kecil saat semua modul di bagian Progres selesai 6/6
 
