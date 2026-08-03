@@ -210,19 +210,33 @@ section{padding:96px 0;}
 }
 .kanvas-node:active{cursor:grabbing;}
 .kanvas-node .ic{
-  width:56px; height:56px; border-radius:16px; background:var(--surface); border:2px solid var(--line);
+  position:relative; width:56px; height:56px; border-radius:16px; background:var(--surface); border:2px solid var(--line);
   display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:var(--shadow-soft);
   transition:border-color .2s, box-shadow .2s, transform .2s;
 }
 .kanvas-node span{font-size:11px; font-weight:700; color:var(--ink); background:var(--surface); padding:2px 6px; border-radius:6px; white-space:nowrap;}
 .kanvas-node.is-selected .ic{border-color:var(--primary); box-shadow:0 0 0 5px var(--primary-tint);}
 .kanvas-node.is-active .ic{border-color:var(--data); box-shadow:0 0 0 5px var(--data-tint); transform:scale(1.08);}
+.kanvas-node.is-blocked .ic{border-color:var(--error); box-shadow:0 0 0 5px var(--error-tint); transform:scale(1.08);}
 .kanvas-node.is-delete-hover .ic{border-color:var(--error); box-shadow:0 0 0 5px var(--error-tint);}
+.kanvas-node .block-badge{
+  position:absolute; top:-4px; right:-4px; width:16px; height:16px; border-radius:50%;
+  background:var(--error); color:#fff; font-size:9px; display:none; align-items:center; justify-content:center;
+  border:2px solid var(--surface);
+}
+.kanvas-node.has-rule .block-badge{display:flex;}
+#kanvasPacket.is-blocked{background:var(--error); box-shadow:0 0 0 6px var(--error-tint), 0 0 16px rgba(255,107,74,.55);}
 #kanvasPacket{
   position:absolute; width:14px; height:14px; margin-left:-7px; margin-top:-7px; border-radius:50%; background:var(--data);
   box-shadow:0 0 0 6px var(--data-tint), 0 0 16px rgba(15,185,129,.55); opacity:0; z-index:5;
-  transition:left .55s cubic-bezier(.45,0,.2,1), top .55s cubic-bezier(.45,0,.2,1), opacity .2s;
+  transition:left .55s cubic-bezier(.45,0,.2,1), top .55s cubic-bezier(.45,0,.2,1), opacity .2s, background .2s, box-shadow .2s;
 }
+.firewall-config{
+  display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; padding:14px 16px;
+  border-radius:var(--radius-sm); background:var(--error-tint); border:1.5px solid var(--error);
+}
+.firewall-config.is-shown{display:flex;}
+.firewall-config-label{font-size:13px; font-weight:700; color:#B8391E; white-space:nowrap;}
 .kanvas-send-row{display:flex; align-items:center; gap:10px; margin:20px 0 0; flex-wrap:wrap;}
 .kanvas-send-row span{color:var(--muted); font-weight:700;}
 .select-input{
@@ -650,6 +664,7 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
           <button class="btn btn-ghost" data-add="switch">+ 🔀 Switch</button>
           <button class="btn btn-ghost" data-add="router">+ 📡 Router</button>
           <button class="btn btn-ghost" data-add="server">+ 🖥️ Server</button>
+          <button class="btn btn-ghost" data-add="firewall">+ 🛡️ Firewall</button>
           <button class="btn btn-ghost" id="btnConnectMode">🔗 Mode Sambung</button>
           <button class="btn btn-ghost" id="btnDeleteMode">🗑️ Mode Hapus</button>
           <button class="btn btn-ghost" id="btnResetCanvas">↺ Reset Kanvas</button>
@@ -661,6 +676,12 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
             <div id="kanvasPacket"></div>
             <div class="kanvas-hint" id="kanvasHint">👆 Klik salah satu tombol "+ Perangkat" di atas untuk mulai membangun jaringanmu.</div>
           </div>
+        </div>
+
+        <div class="firewall-config" id="firewallConfig">
+          <span class="firewall-config-label">🛡️ Aturan <b id="firewallConfigName">Firewall</b> — blokir data dari:</span>
+          <select id="firewallConfigSelect" class="select-input"><option value="">Izinkan semua perangkat</option></select>
+          <button class="btn btn-ghost" id="firewallConfigClose">Tutup</button>
         </div>
 
         <div class="kanvas-send-row">
@@ -689,7 +710,7 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
     <div class="card kanvas-missions">
       <div class="kanvas-missions-head">
         <h4>🎯 Misi Kanvas</h4>
-        <span class="eyebrow" style="margin:0;" id="missionCounter">0/5 misi selesai</span>
+        <span class="eyebrow" style="margin:0;" id="missionCounter">0/6 misi selesai</span>
       </div>
       <p class="kanvas-missions-sub">Tantangan singkat langsung di kanvas atas — otomatis tercentang begitu syaratnya terpenuhi, tidak perlu tombol cek.</p>
       <ul class="mission-list" id="missionList"><!-- injected by JS --></ul>
@@ -918,7 +939,15 @@ const CARD_DATA = [
   {id:'switch', icon:'🏢', analogyTitle:'Resepsionis Kantor', analogyText:'Tahu persis siapa duduk di ruangan mana, jadi kiriman langsung diantar ke meja yang tepat.', term:'Switch', termText:'Perangkat yang menghubungkan banyak perangkat dalam satu jaringan lokal dan meneruskan data ke tujuan yang tepat.'},
   {id:'bandwidth', icon:'🛣️', analogyTitle:'Lebar Jalan Tol', analogyText:'Jalan yang lebih lebar bisa dilewati lebih banyak mobil sekaligus.', term:'Bandwidth', termText:'Kapasitas maksimum data yang bisa dikirim dalam satu waktu.'},
   {id:'firewall', icon:'🛡️', analogyTitle:'Satpam Gerbang Kompleks', analogyText:'Memeriksa siapa yang boleh masuk dan siapa yang harus ditolak.', term:'Firewall', termText:'Sistem keamanan yang menyaring data mana yang boleh masuk dan keluar jaringan.'},
-  {id:'dns', icon:'📖', analogyTitle:'Buku Telepon', analogyText:'Kamu ingat nama orang, bukan nomor teleponnya — buku telepon mencarikan nomornya.', term:'DNS', termText:'Sistem yang menerjemahkan nama website menjadi IP Address supaya mudah diingat manusia.'}
+  {id:'dns', icon:'📖', analogyTitle:'Buku Telepon', analogyText:'Kamu ingat nama orang, bukan nomor teleponnya — buku telepon mencarikan nomornya.', term:'DNS', termText:'Sistem yang menerjemahkan nama website menjadi IP Address supaya mudah diingat manusia.'},
+  {id:'subnetting', icon:'🏘️', analogyTitle:'Kompleks Dibagi Blok', analogyText:'Satu kompleks besar dibagi jadi Blok A, B, C supaya lebih rapi dan gampang diurus.', term:'Subnetting', termText:'Membagi satu jaringan besar menjadi beberapa jaringan kecil yang lebih rapi dan efisien.'},
+  {id:'latency', icon:'🐢', analogyTitle:'Waktu Tunggu Kurir', analogyText:'Jeda sejak kamu pesan barang online sampai kurirnya benar-benar sampai di depan pintu.', term:'Latency', termText:'Waktu tunda antara saat data dikirim dan saat data itu diterima di sisi lain.'},
+  {id:'mac', icon:'🪪', analogyTitle:'Nomor KTP Perangkat', analogyText:'Setiap orang punya nomor identitas unik yang menempel seumur hidup, tidak berubah walau pindah rumah.', term:'MAC Address', termText:'"Nomor seri" fisik unik yang tertanam di kartu jaringan tiap perangkat.'},
+  {id:'protokol', icon:'🤝', analogyTitle:'Bahasa yang Disepakati', analogyText:'Dua orang beda negara sepakat pakai satu bahasa yang sama-sama dimengerti supaya nyambung ngobrolnya.', term:'Protokol', termText:'Aturan baku supaya dua perangkat berbeda bisa "berbicara" dalam bahasa yang sama.'},
+  {id:'gateway', icon:'🚪', analogyTitle:'Pintu Gerbang Kompleks', analogyText:'Satu-satunya pintu keluar-masuk kompleks perumahan menuju jalan raya di luar.', term:'Gateway', termText:'Pintu penghubung yang menjembatani jaringan lokal dengan jaringan luar, seperti internet.'},
+  {id:'dhcp', icon:'🎫', analogyTitle:'Panitia Bagi Nomor Antrean', analogyText:'Begitu kamu datang ke acara, panitia otomatis kasih nomor antrean tanpa kamu perlu minta atau atur sendiri.', term:'DHCP', termText:'Sistem yang otomatis membagikan IP Address ke perangkat baru yang bergabung ke jaringan, tanpa diatur manual.'},
+  {id:'vpn', icon:'🕶️', analogyTitle:'Terowongan Rahasia', analogyText:'Jalan pintas tersembunyi yang cuma kamu dan orang yang kamu percaya tahu — aman dari orang lain yang lewat jalan umum.', term:'VPN', termText:'Jalur pribadi terenkripsi di atas jaringan publik, seperti terowongan rahasia lewat internet.'},
+  {id:'bitbyte', icon:'🧱', analogyTitle:'Bata Penyusun Tembok', analogyText:'Satu bata kecil sendiri belum berarti apa-apa, tapi disusun delapan jadi satu blok yang bisa dipakai membangun.', term:'Bit & Byte', termText:'Satuan terkecil data digital — 8 bit membentuk 1 byte.'}
 ];
 
 const OSI_STEPS = [
@@ -951,13 +980,30 @@ const GLOSSARY_TERMS = [
   {icon:'🔌', name:'Port', def:'Nomor "pintu" di sebuah perangkat yang menandai jenis layanan tertentu, misalnya Port 80 untuk website.'},
   {icon:'🌐', name:'LAN & WAN', def:'LAN adalah jaringan di area kecil seperti satu gedung; WAN menghubungkan jaringan-jaringan itu antar kota atau negara.'},
   {icon:'🕸️', name:'Topologi Jaringan', def:'Pola bagaimana perangkat-perangkat di jaringan saling terhubung, misalnya bintang, bus, atau cincin.'},
-  {icon:'🔐', name:'Enkripsi', def:'Proses mengacak data supaya hanya pihak yang punya kuncinya yang bisa membacanya.'}
+  {icon:'🔐', name:'Enkripsi', def:'Proses mengacak data supaya hanya pihak yang punya kuncinya yang bisa membacanya.'},
+  {icon:'📋', name:'TCP/IP', def:'Kumpulan aturan dasar yang jadi fondasi hampir semua komunikasi internet, mengatur cara data dikemas dan dikirim.'},
+  {icon:'🌍', name:'HTTP/HTTPS', def:'Protokol yang dipakai browser untuk memuat halaman website; HTTPS adalah versi yang datanya sudah dienkripsi lebih aman.'},
+  {icon:'🏓', name:'Ping', def:'Perintah untuk menguji apakah sebuah alamat di jaringan bisa dijangkau, sekaligus mengukur berapa lama responnya.'},
+  {icon:'🌉', name:'Bridge', def:'Perangkat yang menyambungkan dua segmen jaringan berbeda supaya bisa berkomunikasi seolah satu jaringan.'},
+  {icon:'📶', name:'Access Point', def:'Perangkat yang memancarkan sinyal WiFi supaya perangkat lain bisa terhubung ke jaringan tanpa kabel.'},
+  {icon:'📛', name:'SSID', def:'Nama jaringan yang muncul saat kamu mencari WiFi di HP atau laptop.'},
+  {icon:'✂️', name:'VLAN', def:'Membagi satu jaringan fisik jadi beberapa jaringan virtual terpisah, tanpa perlu kabel atau perangkat tambahan.'},
+  {icon:'🧵', name:'Kabel UTP', def:'Kabel jaringan paling umum dipakai di LAN, isinya pasangan kawat tembaga yang saling dipilin.'},
+  {icon:'💡', name:'Fiber Optik', def:'Kabel yang mengirim data lewat cahaya di serat kaca tipis — jauh lebih cepat dan tahan gangguan dibanding kabel tembaga.'},
+  {icon:'🛰️', name:'ISP', def:'Perusahaan penyedia layanan supaya rumah atau kantor bisa terhubung ke internet, misalnya Telkom atau Indosat.'}
 ];
 
 const QUIZ_DATA = [
   {q:'Apa fungsi utama Router dalam sebuah jaringan?', opts:['Mengatur rute data antar jaringan yang berbeda','Menyimpan file di dalam jaringan','Mengubah nama website jadi IP Address','Memberi warna pada kabel jaringan'], correct:0, explain:' Router bertugas menentukan jalur terbaik supaya data sampai ke jaringan tujuan yang berbeda dari jaringan asal — seperti petugas pos yang tahu rute antar kompleks.'},
   {q:'IP Address 192.168.1.10 dengan subnet /24 — berapa alamat Network-nya?', opts:['192.168.1.0','192.168.1.255','192.168.0.0','10.0.0.0'], correct:0, explain:' Dengan /24, tiga oktet pertama (192.168.1) adalah bagian jaringan, dan oktet terakhir menjadi 0 untuk alamat Network — jadi hasilnya 192.168.1.0.'},
-  {q:'Layer OSI mana yang bertugas memecah data jadi paket kecil dan menomorinya?', opts:['Transport (Layer 4)','Physical (Layer 1)','Application (Layer 7)','Data Link (Layer 2)'], correct:0, explain:' Transport Layer (Layer 4) memecah data jadi paket-paket kecil, menomorinya, dan memastikan semua paket sampai dengan lengkap — lewat protokol seperti TCP.'}
+  {q:'Layer OSI mana yang bertugas memecah data jadi paket kecil dan menomorinya?', opts:['Transport (Layer 4)','Physical (Layer 1)','Application (Layer 7)','Data Link (Layer 2)'], correct:0, explain:' Transport Layer (Layer 4) memecah data jadi paket-paket kecil, menomorinya, dan memastikan semua paket sampai dengan lengkap — lewat protokol seperti TCP.'},
+  {q:'Apa fungsi utama Switch dalam jaringan lokal?', opts:['Menghubungkan banyak perangkat dalam satu jaringan lokal','Mengatur rute ke jaringan luar yang berbeda','Menyaring data berbahaya dari internet','Memberi nama domain ke sebuah IP Address'], correct:0, explain:' Switch menghubungkan banyak perangkat dalam satu jaringan lokal dan meneruskan data ke perangkat yang tepat — seperti resepsionis yang tahu persis ruangan siapa.'},
+  {q:'Firewall dalam jaringan berfungsi untuk...', opts:['Menyaring data mana yang boleh masuk dan keluar jaringan','Mempercepat koneksi internet','Menyimpan cadangan password WiFi','Mengubah IP Address jadi MAC Address'], correct:0, explain:' Firewall memeriksa dan menyaring lalu lintas data berdasarkan aturan yang diatur — seperti satpam yang memutuskan siapa boleh lewat gerbang.'},
+  {q:'Ciri khas topologi Star adalah...', opts:['Semua perangkat terhubung langsung ke satu titik pusat (biasanya Switch)','Semua perangkat membentuk lingkaran tertutup','Setiap perangkat wajib terhubung ke semua perangkat lain','Perangkat tersambung berurutan dalam satu garis panjang'], correct:0, explain:' Topologi Star punya satu perangkat pusat (biasanya Switch) yang jadi penghubung semua perangkat lain — mirip jari-jari roda yang bertemu di tengah.'},
+  {q:'Kelebihan utama topologi Mesh dibanding topologi Bus?', opts:['Kalau satu jalur putus, masih ada jalur lain karena semua saling terhubung','Kabel yang dipakai jauh lebih sedikit','Tidak perlu perangkat Switch maupun Router sama sekali','Semua data wajib lewat satu titik pusat'], correct:0, explain:' Karena tiap perangkat di topologi Mesh saling tersambung langsung, kalau satu jalur putus, data masih bisa lewat jalur lain — jaringan jadi lebih tahan gangguan.'},
+  {q:'DNS bertugas untuk...', opts:['Menerjemahkan nama website menjadi IP Address','Memblokir website yang berbahaya','Mempercepat waktu loading website','Menyimpan riwayat pencarian di browser'], correct:0, explain:' DNS bekerja seperti buku telepon internet — kamu ingat nama website-nya, DNS yang mencarikan IP Address di baliknya.'},
+  {q:'Latency yang tinggi pada koneksi internet berarti...', opts:['Ada jeda/delay yang cukup lama antara data dikirim dan diterima','Kecepatan maksimum datanya sangat besar','Datanya sedang dienkripsi ganda','Alamat IP perangkat sedang salah'], correct:0, explain:' Latency mengukur jeda waktu, bukan kapasitas — latency tinggi artinya ada delay yang terasa, meski bandwidth-nya besar sekalipun.'},
+  {q:'Ada berapa lapisan (layer) dalam model OSI?', opts:['7 layer','4 layer','5 layer','10 layer'], correct:0, explain:' Model OSI punya 7 layer, dari Application (Layer 7) di paling atas sampai Physical (Layer 1) di paling bawah.'}
 ];
 
 const MISSIONS = [
@@ -965,9 +1011,10 @@ const MISSIONS = [
   {id:'star-hub', title:'Pusat Bintang', desc:'Buat 1 Switch yang tersambung ke minimal 3 perangkat lain — itulah cikal-bakal topologi Star.'},
   {id:'through-router', title:'Lewat Router', desc:'Berhasil kirim data yang melewati Router setidaknya sekali.'},
   {id:'see-error', title:'Kenali Kegagalan', desc:'Coba kirim data ke perangkat yang belum tersambung, dan lihat pesan errornya muncul.'},
-  {id:'tree-master', title:'Arsitek Tree', desc:'Bangun topologi berjenjang: minimal 1 Router, 2 Switch, dan 2 Laptop, lalu berhasil kirim data lewat Router.'}
+  {id:'tree-master', title:'Arsitek Tree', desc:'Bangun topologi berjenjang: minimal 1 Router, 2 Switch, dan 2 Laptop, lalu berhasil kirim data lewat Router.'},
+  {id:'firewall-guard', title:'Penjaga Gerbang', desc:'Tambahkan Firewall, klik untuk atur aturan blokir dari salah satu sumber, lalu buktikan blokirnya bekerja dengan mengirim data dari sumber itu.'}
 ];
-const missionState = {basicLink:false, starHub:false, throughRouter:false, sawError:false, treeMaster:false, celebrated:false};
+const missionState = {basicLink:false, starHub:false, throughRouter:false, sawError:false, treeMaster:false, firewallProven:false, celebrated:false};
 
 function renderMissionList(){
   const list = document.getElementById('missionList');
@@ -987,7 +1034,8 @@ function updateMissionUI(){
     'star-hub': missionState.starHub,
     'through-router': missionState.throughRouter,
     'see-error': missionState.sawError,
-    'tree-master': missionState.treeMaster
+    'tree-master': missionState.treeMaster,
+    'firewall-guard': missionState.firewallProven
   };
   let done = 0;
   Object.keys(map).forEach(id=>{
@@ -1089,9 +1137,9 @@ document.querySelectorAll('#modeSwitch button').forEach(btn=>{
    ================================================================== */
 function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
-const ICONS = {laptop:'💻', switch:'🔀', router:'📡', server:'🖥️'};
-const LABELS = {laptop:'Laptop', switch:'Switch', router:'Router', server:'Server'};
-const typeCounters = {laptop:0, switch:0, router:0, server:0};
+const ICONS = {laptop:'💻', switch:'🔀', router:'📡', server:'🖥️', firewall:'🛡️'};
+const LABELS = {laptop:'Laptop', switch:'Switch', router:'Router', server:'Server', firewall:'Firewall'};
+const typeCounters = {laptop:0, switch:0, router:0, server:0, firewall:0};
 let deviceIdSeq = 0;
 let canvasDevices = [];
 let canvasConnections = [];
@@ -1179,10 +1227,50 @@ function removeDevice(id){
   const el = document.querySelector('.kanvas-node[data-id="' + id + '"]');
   if(el) el.remove();
   addKanvasLog(`🗑️ ${dev.label} dihapus dari kanvas.`);
+  // clear any firewall rule that pointed at the device we just removed
+  canvasDevices.forEach(d=>{
+    if(d.type === 'firewall' && d.blockedSourceId === id){
+      d.blockedSourceId = null;
+      updateFirewallBadge(d);
+    }
+  });
+  if(firewallConfigTarget && firewallConfigTarget.id === id) closeFirewallConfig();
   redrawConnections();
   updateSendDropdowns();
   updateKanvasHint();
 }
+
+let firewallConfigTarget = null;
+function updateFirewallBadge(device){
+  const el = document.querySelector('.kanvas-node[data-id="' + device.id + '"]');
+  if(el) el.classList.toggle('has-rule', !!device.blockedSourceId);
+}
+function openFirewallConfig(device){
+  firewallConfigTarget = device;
+  document.getElementById('firewallConfigName').textContent = device.label;
+  const sel = document.getElementById('firewallConfigSelect');
+  const others = canvasDevices.filter(d => d.id !== device.id);
+  sel.innerHTML = '<option value="">Izinkan semua perangkat</option>' +
+    others.map(d => `<option value="${d.id}">${ICONS[d.type]} ${d.label}</option>`).join('');
+  sel.value = device.blockedSourceId || '';
+  document.getElementById('firewallConfig').classList.add('is-shown');
+}
+function closeFirewallConfig(){
+  firewallConfigTarget = null;
+  document.getElementById('firewallConfig').classList.remove('is-shown');
+}
+document.getElementById('firewallConfigSelect').addEventListener('change', (e)=>{
+  if(!firewallConfigTarget) return;
+  firewallConfigTarget.blockedSourceId = e.target.value || null;
+  updateFirewallBadge(firewallConfigTarget);
+  if(firewallConfigTarget.blockedSourceId){
+    const src = deviceById(firewallConfigTarget.blockedSourceId);
+    addKanvasLog(`🛡️ ${firewallConfigTarget.label} diatur untuk memblokir data dari ${src ? src.label : '(?)'}.`);
+  } else {
+    addKanvasLog(`🛡️ ${firewallConfigTarget.label} sekarang mengizinkan semua perangkat lewat.`);
+  }
+});
+document.getElementById('firewallConfigClose').addEventListener('click', closeFirewallConfig);
 
 function attachNodeInteraction(el, device){
   el.addEventListener('pointerdown', (e)=>{
@@ -1192,9 +1280,12 @@ function attachNodeInteraction(el, device){
     e.preventDefault();
     const areaEl = document.getElementById('kanvasArea');
     const areaRect = areaEl.getBoundingClientRect();
+    const startX = e.clientX, startY = e.clientY;
+    let draggedFar = false;
     try { el.setPointerCapture(e.pointerId); } catch(err){}
 
     function onMove(ev){
+      if(Math.hypot(ev.clientX - startX, ev.clientY - startY) > 6) draggedFar = true;
       const x = ev.clientX - areaRect.left;
       const y = ev.clientY - areaRect.top;
       device.x = Math.max(28, Math.min(areaRect.width - 28, x));
@@ -1206,6 +1297,7 @@ function attachNodeInteraction(el, device){
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
       try { el.releasePointerCapture(ev.pointerId); } catch(err){}
+      if(!draggedFar && device.type === 'firewall') openFirewallConfig(device);
     }
     el.addEventListener('pointermove', onMove);
     el.addEventListener('pointerup', onUp);
@@ -1216,7 +1308,7 @@ function renderNode(device){
   const el = document.createElement('div');
   el.className = 'kanvas-node';
   el.dataset.id = device.id;
-  el.innerHTML = `<div class="ic">${ICONS[device.type]}</div><span>${device.label}</span>`;
+  el.innerHTML = `<div class="ic">${ICONS[device.type]}<span class="block-badge">🚫</span></div><span>${device.label}</span>`;
   positionNode(el, device);
   attachNodeInteraction(el, device);
   document.getElementById('kanvasArea').appendChild(el);
@@ -1229,7 +1321,8 @@ function createDeviceAt(type, x, y){
     id: 'd' + deviceIdSeq,
     type,
     label: LABELS[type] + ' ' + typeCounters[type],
-    x, y
+    x, y,
+    blockedSourceId: null
   };
   canvasDevices.push(device);
   renderNode(device);
@@ -1324,6 +1417,7 @@ async function runCanvasSequence(path){
   const fromDevice = deviceById(path[0]);
   const toDevice = deviceById(path[path.length - 1]);
   const packet = document.getElementById('kanvasPacket');
+  packet.classList.remove('is-blocked');
   packet.style.transition = 'none';
   packet.style.opacity = '1';
   placeKanvasPacketAt(fromDevice);
@@ -1355,6 +1449,20 @@ async function runCanvasSequence(path){
       } else if(device.type === 'router'){
         addKanvasLog(`📡 ${device.label} membaca Layer 3 (IP Address) untuk menentukan rute berikutnya.`);
         setOsiBarState(3, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(3, 'done');
+      } else if(device.type === 'firewall'){
+        if(device.blockedSourceId === fromDevice.id){
+          addKanvasLog(`🛡️ ${device.label} MEMBLOKIR data dari ${fromDevice.label} — sesuai aturan firewall yang kamu atur. Transfer dihentikan. ❌`, true);
+          clearCanvasNodeStates();
+          document.querySelector('.kanvas-node[data-id="' + device.id + '"]').classList.add('is-blocked');
+          packet.classList.add('is-blocked');
+          missionState.firewallProven = true;
+          updateMissionUI();
+          kanvasRunning = false;
+          setSendButtonsEnabled(true);
+          return;
+        }
+        addKanvasLog(`🛡️ ${device.label} memeriksa Layer 4 (Transport) — aturan keamanan lolos, data diteruskan.`);
+        setOsiBarState(4, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(4, 'done');
       } else {
         addKanvasLog(`↪️ Data melewati ${device.label}.`);
       }
@@ -1416,7 +1524,9 @@ function clearCanvasState(){
   typeCounters.switch = 0;
   typeCounters.router = 0;
   typeCounters.server = 0;
+  typeCounters.firewall = 0;
   deviceIdSeq = 0;
+  closeFirewallConfig();
   document.getElementById('btnConnectMode').classList.remove('is-active');
   document.getElementById('btnDeleteMode').classList.remove('is-active');
   document.querySelectorAll('.kanvas-node').forEach(n => n.remove());
@@ -1425,6 +1535,7 @@ function clearCanvasState(){
   updateKanvasHint();
   resetOsiBars();
   const packet = document.getElementById('kanvasPacket');
+  packet.classList.remove('is-blocked');
   packet.style.transition = 'none';
   packet.style.opacity = '0';
 }
@@ -1796,10 +1907,20 @@ document.getElementById('ipInput').addEventListener('input', calcSubnet);
 /* ==================================================================
    MODULE 6 — QUIZ
    ================================================================== */
-const quizState = {currentQ:0, score:0, answered:false};
+const QUIZ_SESSION_SIZE = 5;
+const quizState = {currentQ:0, score:0, answered:false, questions:[]};
+
+function buildQuizSession(){
+  const pool = shuffleArr(QUIZ_DATA.slice());
+  const picked = pool.slice(0, Math.min(QUIZ_SESSION_SIZE, QUIZ_DATA.length));
+  quizState.questions = picked.map(q=>{
+    const opts = shuffleArr(q.opts.map((text, idx) => ({text, isCorrect: idx === q.correct})));
+    return { q: q.q, opts: opts.map(o => o.text), correct: opts.findIndex(o => o.isCorrect), explain: q.explain };
+  });
+}
 
 function buildQuizDots(){
-  document.getElementById('quizProgress').innerHTML = QUIZ_DATA.map(()=>'<div class="quiz-dot"></div>').join('');
+  document.getElementById('quizProgress').innerHTML = quizState.questions.map(()=>'<div class="quiz-dot"></div>').join('');
 }
 function updateQuizDots(){
   document.querySelectorAll('.quiz-dot').forEach((d,i)=>{
@@ -1810,12 +1931,12 @@ function updateQuizDots(){
 }
 function renderQuiz(){
   updateQuizDots();
-  if(quizState.currentQ >= QUIZ_DATA.length){
+  if(quizState.currentQ >= quizState.questions.length){
     document.getElementById('quizBody').classList.add('hidden');
     document.getElementById('quizSummary').classList.add('is-shown');
-    document.getElementById('quizScore').textContent = quizState.score + '/' + QUIZ_DATA.length;
+    document.getElementById('quizScore').textContent = quizState.score + '/' + quizState.questions.length;
     let msg;
-    if(quizState.score === QUIZ_DATA.length) msg = 'Keren, kamu paham betul konsep-konsep di atas! 🎉';
+    if(quizState.score === quizState.questions.length) msg = 'Keren, kamu paham betul konsep-konsep di atas! 🎉';
     else if(quizState.score > 0) msg = 'Lumayan! Coba lihat lagi bagian yang belum pas, lalu ulangi kuisnya.';
     else msg = 'Belum apa-apa — coba pelajari lagi modul di atas, lalu ulangi kuisnya.';
     document.getElementById('quizSummaryText').textContent = msg;
@@ -1825,7 +1946,7 @@ function renderQuiz(){
   document.getElementById('quizBody').classList.remove('hidden');
   document.getElementById('quizSummary').classList.remove('is-shown');
   quizState.answered = false;
-  const q = QUIZ_DATA[quizState.currentQ];
+  const q = quizState.questions[quizState.currentQ];
   document.getElementById('quizQuestion').textContent = q.q;
   document.getElementById('quizOpts').innerHTML = q.opts.map((opt,idx) =>
     `<button class="btn btn-ghost quiz-opt" data-idx="${idx}" style="justify-content:flex-start;">${opt}</button>`).join('');
@@ -1846,12 +1967,18 @@ function renderQuiz(){
       explain.classList.add('is-shown');
       const nextBtn = document.getElementById('quizNextBtn');
       nextBtn.classList.remove('hidden');
-      nextBtn.textContent = quizState.currentQ === QUIZ_DATA.length - 1 ? 'Lihat Hasil →' : 'Lanjut →';
+      nextBtn.textContent = quizState.currentQ === quizState.questions.length - 1 ? 'Lihat Hasil →' : 'Lanjut →';
     });
   });
 }
 document.getElementById('quizNextBtn').addEventListener('click', ()=>{ quizState.currentQ++; renderQuiz(); });
-document.getElementById('quizRestartBtn').addEventListener('click', ()=>{ quizState.currentQ = 0; quizState.score = 0; renderQuiz(); });
+document.getElementById('quizRestartBtn').addEventListener('click', ()=>{
+  buildQuizSession();
+  buildQuizDots();
+  quizState.currentQ = 0;
+  quizState.score = 0;
+  renderQuiz();
+});
 
 /* ==================================================================
    INIT
@@ -1862,6 +1989,7 @@ renderKanvasOsiStack();
 updateKanvasHint();
 renderGlossaryFolder('');
 calcSubnet();
+buildQuizSession();
 buildQuizDots();
 renderQuiz();
 updateProgressCount();
