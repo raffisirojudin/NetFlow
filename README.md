@@ -14,13 +14,14 @@ Bangun topologi jaringan sendiri lewat drag & drop — tambah Laptop, Switch, Ro
 - **Mode Cepat** — muat topologi klasik (Bus, Star, Ring, Mesh, Tree) sekali klik
 - **Firewall sungguhan** — klik untuk atur aturan blokir dari perangkat tertentu, lalu buktikan sendiri data dari sumber itu benar-benar ditolak, sementara sumber lain tetap lolos
 - **Misi Kanvas** — 6 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
+- **🤖 Jelaskan ke AI** — setelah berhasil kirim data, coba jelasin dengan kata-kata sendiri kenapa itu bisa bekerja; Claude menilai apakah penjelasannya menunjukkan pemahaman asli atau cuma hafalan, lalu kasih masukan + pertanyaan lanjutan (lihat catatan penting di bagian [Fitur AI](#-tentang-fitur-jelaskan-ke-ai) di bawah)
 - Error yang jujur — kalau dua perangkat belum tersambung, pengiriman data akan gagal beneran, bukan skenario yang di-skrip
 
 ### 🃏 Kartu Analogi
 Istilah jaringan dipasangkan dengan analogi dunia nyata (Router = petugas pos, Switch = resepsionis kantor, DNS = buku telepon, dst) dalam **14 kartu** yang bisa dibalik. Tiga mode dalam satu tempat: **Jelajah Bebas**, **Tebak Konsep**, dan **Kuis Mini** — kuisnya menarik 5 soal acak dari bank berisi 10 soal setiap kali dicoba (urutan jawaban juga diacak), jadi tiap percobaan terasa beda.
 
 ### 📖 Glosarium
-Kamus 20 istilah jaringan, dikemas dalam widget folder yang bisa diklik untuk membuka pencarian instan — bukan grid panjang yang bikin capek scroll.
+Kamus **30 istilah** jaringan, dikemas dalam widget folder yang bisa diklik untuk membuka pencarian instan — bukan grid panjang yang bikin capek scroll.
 
 ### 🧮 Kalkulator Subnet
 Masukkan IP Address dan CIDR, langsung dapat Network Address, Broadcast Address, host range, dan visualisasi 32-bit yang menunjukkan pembagian bit jaringan vs host.
@@ -42,6 +43,24 @@ Tidak ada framework, tidak ada dependency untuk di-*install*:
 - Google Fonts (Plus Jakarta Sans, Inter, JetBrains Mono) via CDN
 
 Seluruh situs — struktur, gaya, dan logika — ada di **satu file**: `index.html`.
+
+---
+
+## 🤖 Tentang Fitur "Jelaskan ke AI"
+
+Fitur ini memanggil Claude API langsung dari browser (`fetch` ke `api.anthropic.com`) untuk menilai penjelasan siswa. Ini penting untuk dipahami sebelum deploy:
+
+- **Dibuka sebagai artifact di Claude.ai** → langsung jalan, tidak perlu setup apa pun.
+- **Di-deploy mandiri** (GitHub Pages, hosting lain, dibuka langsung dari file) → panggilan API-nya **akan gagal**, dan situs akan menampilkan pesan yang jelas ke pengguna (bukan diam-diam error). Ini bukan bug — API key tidak boleh ditaruh di file publik karena siapa pun bisa mengambil dan memakainya.
+
+**Supaya fitur ini live di GitHub Pages**, kamu perlu backend kecil (proxy) yang menyimpan API key dengan aman dan meneruskan permintaan dari situs ke Anthropic. Cara paling sederhana dan gratis:
+
+1. Buat [Cloudflare Worker](https://workers.cloudflare.com/) atau [Vercel Serverless Function](https://vercel.com/docs/functions) baru.
+2. Simpan API key Anthropic-mu sebagai *environment variable* di sana (bukan di kode).
+3. Worker/function itu menerima request dari situsmu, menempelkan API key di header `x-api-key`, lalu meneruskannya ke `https://api.anthropic.com/v1/messages`.
+4. Di `index.html`, ganti URL fetch pada fungsi `submitAiExplanation()` dari `https://api.anthropic.com/v1/messages` menjadi URL Worker/function kamu sendiri.
+
+Kalau langkah ini belum dilakukan, fitur lain di situs tetap berjalan normal — hanya "Jelaskan ke AI" yang menampilkan pesan info, bukan mengganggu bagian lain.
 
 ---
 
