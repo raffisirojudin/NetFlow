@@ -2,8 +2,6 @@
 
 **NetFlow** adalah platform belajar jaringan komputer yang mengubah materi yang biasanya berat dan penuh istilah teknis jadi pengalaman visual, interaktif, dan bisa dicoba sendiri — bukan cuma dibaca. Dibangun sebagai **satu file HTML mandiri**, tanpa instalasi, tanpa server backend, tanpa build step.
 
-🔗 **Live demo:** _tambahkan link GitHub Pages di sini setelah deploy_
-
 ---
 
 ## ✨ Fitur Utama
