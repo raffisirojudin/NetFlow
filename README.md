@@ -14,7 +14,7 @@ Bangun topologi jaringan sendiri lewat drag & drop — tambah Laptop, Switch, Ro
 - **Mode Cepat** — muat topologi klasik (Bus, Star, Ring, Mesh, Tree) sekali klik
 - **Firewall sungguhan** — klik untuk atur aturan blokir dari perangkat tertentu, lalu buktikan sendiri data dari sumber itu benar-benar ditolak, sementara sumber lain tetap lolos
 - **Misi Kanvas** — 6 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
-- **🤖 Jelaskan ke AI** — setelah berhasil kirim data, coba jelasin dengan kata-kata sendiri kenapa itu bisa bekerja; Claude menilai apakah penjelasannya menunjukkan pemahaman asli atau cuma hafalan, lalu kasih masukan + pertanyaan lanjutan (lihat catatan penting di bagian [Fitur AI](#-tentang-fitur-jelaskan-ke-ai) di bawah)
+- **🤖 Jelaskan ke AI** — setelah berhasil kirim data, coba jelasin dengan kata-kata sendiri kenapa itu bisa bekerja; AI (Llama 3.3 lewat Groq, gratis) menilai apakah penjelasannya menunjukkan pemahaman asli atau cuma hafalan, lalu kasih masukan + pertanyaan lanjutan (lihat catatan penting di bagian [Fitur AI](#-tentang-fitur-jelaskan-ke-ai) di bawah)
 - Error yang jujur — kalau dua perangkat belum tersambung, pengiriman data akan gagal beneran, bukan skenario yang di-skrip
 
 ### 🃏 Kartu Analogi
@@ -48,19 +48,46 @@ Seluruh situs — struktur, gaya, dan logika — ada di **satu file**: `index.ht
 
 ## 🤖 Tentang Fitur "Jelaskan ke AI"
 
-Fitur ini memanggil Claude API langsung dari browser (`fetch` ke `api.anthropic.com`) untuk menilai penjelasan siswa. Ini penting untuk dipahami sebelum deploy:
+Fitur ini memanggil **Groq API** (menjalankan model **Llama 3.3 70B**) untuk menilai penjelasan siswa — dipilih karena Groq punya tingkat gratis beneran, tanpa kartu kredit, cukup kuat untuk kebutuhan ini. Yang perlu dipahami:
 
-- **Dibuka sebagai artifact di Claude.ai** → langsung jalan, tidak perlu setup apa pun.
-- **Di-deploy mandiri** (GitHub Pages, hosting lain, dibuka langsung dari file) → panggilan API-nya **akan gagal**, dan situs akan menampilkan pesan yang jelas ke pengguna (bukan diam-diam error). Ini bukan bug — API key tidak boleh ditaruh di file publik karena siapa pun bisa mengambil dan memakainya.
+- Fitur ini **butuh proxy sendiri untuk aktif** — beda dari fitur lain di situs yang langsung jalan begitu file dibuka, "Jelaskan ke AI" perlu backend kecil dulu (langkah di bawah) karena API key tidak boleh ditaruh langsung di file publik.
+- Sebelum di-setup, tombolnya tetap bisa diklik tapi akan menampilkan pesan "belum dikonfigurasi" yang jelas — bukan diam-diam error, dan fitur lain di situs tetap jalan normal.
 
-**Supaya fitur ini live di GitHub Pages**, kamu perlu backend kecil (proxy) yang menyimpan API key dengan aman dan meneruskan permintaan dari situs ke Anthropic. Cara paling sederhana dan gratis:
+### Cara mengaktifkannya (gratis, ±10 menit)
 
-1. Buat [Cloudflare Worker](https://workers.cloudflare.com/) atau [Vercel Serverless Function](https://vercel.com/docs/functions) baru.
-2. Simpan API key Anthropic-mu sebagai *environment variable* di sana (bukan di kode).
-3. Worker/function itu menerima request dari situsmu, menempelkan API key di header `x-api-key`, lalu meneruskannya ke `https://api.anthropic.com/v1/messages`.
-4. Di `index.html`, ganti URL fetch pada fungsi `submitAiExplanation()` dari `https://api.anthropic.com/v1/messages` menjadi URL Worker/function kamu sendiri.
+Kamu butuh backend kecil (*proxy*) yang menyimpan API key Groq dengan aman lalu meneruskan permintaan dari situsmu. File `ai-proxy-worker.js` di repo ini sudah berisi kodenya — tinggal ikuti langkah berikut pakai [Cloudflare Workers](https://workers.cloudflare.com/) (gratis, cukup lewat browser, tidak perlu install apa pun di komputer):
 
-Kalau langkah ini belum dilakukan, fitur lain di situs tetap berjalan normal — hanya "Jelaskan ke AI" yang menampilkan pesan info, bukan mengganggu bagian lain.
+1. **Siapkan API key Groq (gratis).**
+   Buka [console.groq.com](https://console.groq.com/), daftar (tanpa kartu kredit), lalu buat API key baru di menu **API Keys**. Key-nya diawali `gsk_`. Simpan, jangan dibagikan ke siapa pun.
+
+2. **Buat akun Cloudflare** (gratis) di [dash.cloudflare.com](https://dash.cloudflare.com/) kalau belum punya.
+
+3. **Buat Worker baru.**
+   Di dashboard, buka menu **Workers & Pages** di sidebar kiri → klik **Create application** → pilih **Create Worker** → klik **Deploy** (pakai kode contoh dulu, nanti diganti).
+
+4. **Ganti kode Worker-nya.**
+   Setelah ter-deploy, klik **Edit code**. Hapus semua isi editornya, lalu paste seluruh isi file **`ai-proxy-worker.js`** dari repo ini. Klik **Save and Deploy**.
+
+5. **Tambahkan API key sebagai Secret** (bukan teks biasa, supaya tidak terlihat siapa pun termasuk kamu sendiri setelah disimpan).
+   Balik ke halaman Worker → tab **Settings** → bagian **Variables and Secrets** → klik **Add**.
+   - Type: pilih **Secret**
+   - Variable name: `GROQ_API_KEY`
+   - Value: paste API key dari langkah 1
+
+   Klik **Deploy** untuk menyimpan.
+
+6. **Salin URL Worker-mu.** Bentuknya seperti:
+   `https://nama-worker-kamu.username-kamu.workers.dev`
+
+7. **Sambungkan ke NetFlow.** Buka `index.html`, cari baris ini di paling atas bagian `<script>`:
+   ```js
+   const AI_PROXY_URL = '';
+   ```
+   Isi tanda kutip kosong itu dengan URL Worker-mu dari langkah 6. Simpan, lalu push ke GitHub seperti biasa.
+
+Selesai — fitur "Jelaskan ke AI" sekarang aktif penuh dan gratis, dan API key-nya tetap aman tersimpan di Cloudflare, tidak pernah terlihat di kode publik.
+
+> 💡 Groq punya *rate limit* di tingkat gratisnya (dibatasi jumlah request per menit, bukan tagihan). Cukup untuk pemakaian kelas/demo. Kalau butuh model lain, cek daftar model terbaru di [console.groq.com/docs/models](https://console.groq.com/docs/models) dan ubah nilai `model` di `ai-proxy-worker.js` maupun `submitAiExplanation()` dalam `index.html`.
 
 ---
 
@@ -82,8 +109,9 @@ Unduh `index.html`, buka langsung di browser mana saja. Tidak perlu `npm install
 
 ```
 .
-├── index.html   # Seluruh situs — HTML, CSS, dan JS dalam satu file
-└── README.md    # Berkas ini
+├── index.html            # Seluruh situs — HTML, CSS, dan JS dalam satu file
+├── ai-proxy-worker.js    # (Opsional) kode proxy untuk mengaktifkan "Jelaskan ke AI" di GitHub Pages
+└── README.md             # Berkas ini
 ```
 
 ---
