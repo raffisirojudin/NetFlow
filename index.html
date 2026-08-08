@@ -752,9 +752,9 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
     <div class="card kanvas-ai-explain">
       <div class="kanvas-ai-head">
         <h4>🤖 Jelaskan ke AI</h4>
-        <span class="ai-badge">Powered by Claude</span>
+        <span class="ai-badge">Powered by Llama 3.3 (Groq)</span>
       </div>
-      <p class="kanvas-ai-sub">Bukan cuma "berhasil" — coba jelasin pakai kata-katamu sendiri KENAPA pengiriman data tadi bisa jalan. Claude bakal kasih masukan langsung, bukan sekadar benar/salah.</p>
+      <p class="kanvas-ai-sub">Bukan cuma "berhasil" — coba jelasin pakai kata-katamu sendiri KENAPA pengiriman data tadi bisa jalan. AI bakal kasih masukan langsung, bukan sekadar benar/salah.</p>
       <textarea id="aiExplainInput" rows="3" placeholder="Contoh: Data dari Laptop A bisa sampai ke Server karena..." disabled></textarea>
       <div class="kanvas-ai-actions">
         <button class="btn btn-primary" id="aiExplainSubmit" disabled>Kirim ke AI</button>
@@ -977,6 +977,20 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
 </footer>
 
 <script>
+/* ==================================================================
+   ⚙️ KONFIGURASI — isi URL proxy kamu di sini
+   ==================================================================
+   Fitur "Jelaskan ke AI" pakai Llama 3.3 lewat Groq (gratis, tanpa
+   kartu kredit). Karena API key tidak boleh ditaruh di file publik,
+   fitur ini butuh backend kecil (proxy) yang menyimpannya dengan aman.
+
+   Cara setup proxy-nya (gratis, ±10 menit) ada di README bagian
+   "Tentang Fitur Jelaskan ke AI" — pakai kode dari ai-proxy-worker.js.
+   Setelah proxy jadi, ganti URL kosong di bawah ini dengan URL
+   proxy-mu, contoh: 'https://netflow-ai-proxy.namamu.workers.dev'
+   ================================================================== */
+const AI_PROXY_URL = '';
+
 /* ==================================================================
    DATA
    ================================================================== */
@@ -1715,7 +1729,7 @@ function showOsiInfo(index){
   document.getElementById('kanvasOsiPro').innerHTML = '<span class="lab">Detail Pro</span>' + s.pro;
 }
 
-/* ---- Jelaskan ke AI (Claude API) ---- */
+/* ---- Jelaskan ke AI (Groq / Llama 3.3) ---- */
 function updateAiExplainGate(){
   const unlocked = !!progressState.network;
   const textarea = document.getElementById('aiExplainInput');
@@ -1737,11 +1751,22 @@ async function submitAiExplanation(){
   if(!text) return;
   const btn = document.getElementById('aiExplainSubmit');
   const responseEl = document.getElementById('aiExplainResponse');
+  responseEl.classList.remove('is-shown');
+  responseEl.innerHTML = '';
+
+  if(!AI_PROXY_URL){
+    responseEl.innerHTML =
+      '<div class="ai-response-icon">⚙️</div>' +
+      '<div class="kanvas-ai-response-body">' +
+        '<p class="ai-error-text">Fitur ini belum dikonfigurasi. Butuh proxy Groq gratis (±10 menit setup) supaya API key tersimpan aman — lihat README bagian "Tentang Fitur Jelaskan ke AI" untuk langkah-langkahnya, lalu isi <code>AI_PROXY_URL</code> di bagian atas file ini.</p>' +
+      '</div>';
+    responseEl.classList.add('is-shown');
+    return;
+  }
+
   btn.disabled = true;
   const originalBtnText = btn.textContent;
   btn.textContent = 'Mengirim...';
-  responseEl.classList.remove('is-shown');
-  responseEl.innerHTML = '';
 
   const ctx = lastSuccessfulSend || {};
   const systemPrompt = 'Kamu tutor jaringan komputer yang ramah untuk siswa SMK TKJ pemula yang belajar lewat simulator interaktif bernama NetFlow. ' +
@@ -1759,21 +1784,23 @@ async function submitAiExplanation(){
     `Penjelasan saya kenapa ini bisa berhasil: "${text}"`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(AI_PROXY_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{role: 'user', content: userMessage}]
+        model: 'llama-3.3-70b-versatile',
+        response_format: {type: 'json_object'},
+        messages: [
+          {role: 'system', content: systemPrompt},
+          {role: 'user', content: userMessage}
+        ]
       })
     });
     if(!response.ok) throw new Error('api-unavailable');
     const data = await response.json();
-    const textBlock = (data.content || []).find(b => b.type === 'text');
-    if(!textBlock) throw new Error('empty-response');
-    const cleaned = textBlock.text.replace(/```json|```/g, '').trim();
+    const rawText = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if(!rawText) throw new Error('empty-response');
+    const cleaned = rawText.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(cleaned);
     const verdictLabel = {paham:'✅ Paham Betul', cukup:'🤔 Sudah Mendekati', kurang:'🌱 Masih Perlu Dalami'}[parsed.verdict] || '🤖 Masukan';
     const verdictClass = ['paham','cukup','kurang'].includes(parsed.verdict) ? parsed.verdict : 'cukup';
@@ -1789,7 +1816,7 @@ async function submitAiExplanation(){
     responseEl.innerHTML =
       '<div class="ai-response-icon">⚠️</div>' +
       '<div class="kanvas-ai-response-body">' +
-        '<p class="ai-error-text">Belum bisa menghubungi Claude dari sini. Fitur ini butuh akses API — otomatis tersedia kalau dibuka sebagai artifact di Claude.ai, tapi kalau situs ini di-deploy sendiri (misalnya di GitHub Pages), perlu backend kecil tambahan untuk menyimpan API key dengan aman. Lihat README untuk caranya.</p>' +
+        '<p class="ai-error-text">Belum bisa menghubungi AI dari sini. Cek lagi apakah proxy Groq-nya sudah jalan dan <code>AI_PROXY_URL</code> sudah diisi URL yang benar. Lihat README kalau perlu langkah ulang.</p>' +
       '</div>';
     responseEl.classList.add('is-shown');
   } finally {
