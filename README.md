@@ -2,16 +2,18 @@
 
 **NetFlow** adalah platform belajar jaringan komputer yang mengubah materi yang biasanya berat dan penuh istilah teknis jadi pengalaman visual, interaktif, dan bisa dicoba sendiri — bukan cuma dibaca. Dibangun sebagai **satu file HTML mandiri**, tanpa instalasi, tanpa server backend, tanpa build step.
 
+🔗 **Live demo:** _tambahkan link GitHub Pages di sini setelah deploy_
+
 ---
 
 ## ✨ Fitur Utama
 
 ### 🖧 Kanvas Jaringan
-Bangun topologi jaringan sendiri lewat drag & drop — tambah Laptop, Switch, Router, Server, atau **Firewall**, sambungkan kabelnya sendiri, lalu kirim data dan lihat animasi tiap lapisan OSI aktif secara real-time (dibungkus di pengirim, dibaca di tiap hop, dibongkar di penerima).
+Bangun topologi jaringan sendiri lewat drag & drop — pilih dari **11 jenis perangkat** lewat dropdown "+ Tambah Perangkat" (Laptop, Switch, Router, Server, Firewall, Hub, Access Point, Modem, Internet, DNS Server, DHCP Server), sambungkan kabelnya sendiri, lalu kirim data dan lihat animasi tiap lapisan OSI aktif secara real-time. Tiap jenis perangkat punya perilaku simulasi sendiri saat dilewati data — Switch & Access Point membaca Layer 2, Router & Internet membaca Layer 3, Firewall memeriksa Layer 4, Hub & Modem cuma beroperasi di Layer 1 (dan Hub secara sengaja "kurang pintar" — dia menyiarkan ke semua yang tersambung, bukan cuma tujuan, buat menunjukkan kenapa Switch lebih unggul). Koneksi ke Access Point digambar putus-putus untuk membedakan sambungan nirkabel dari kabel.
 
 - **Mode Cepat** — muat topologi klasik (Bus, Star, Ring, Mesh, Tree) sekali klik
 - **Firewall sungguhan** — klik untuk atur aturan blokir dari perangkat tertentu, lalu buktikan sendiri data dari sumber itu benar-benar ditolak, sementara sumber lain tetap lolos
-- **Misi Kanvas** — 6 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
+- **Misi Kanvas** — 7 tantangan singkat yang otomatis tercentang begitu berhasil diselesaikan, dan tetap tersimpan sebagai pencapaian meski kanvas di-reset
 - **🤖 Jelaskan ke AI** — setelah berhasil kirim data, coba jelasin dengan kata-kata sendiri kenapa itu bisa bekerja; AI (Llama 3.3 lewat Groq, gratis) menilai apakah penjelasannya menunjukkan pemahaman asli atau cuma hafalan, lalu kasih masukan + pertanyaan lanjutan (lihat catatan penting di bagian [Fitur AI](#-tentang-fitur-jelaskan-ke-ai) di bawah)
 - Error yang jujur — kalau dua perangkat belum tersambung, pengiriman data akan gagal beneran, bukan skenario yang di-skrip
 
