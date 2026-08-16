@@ -184,7 +184,22 @@ section{padding:96px 0;}
 .kanvas-layout{display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:stretch;}
 @media (max-width:760px){ .kanvas-layout{grid-template-columns:1fr;} .hero .wrap{grid-template-columns:1fr;} }
 .kanvas-main{padding:28px;}
-.kanvas-toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+.kanvas-toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; position:relative;}
+.device-picker{position:relative; display:inline-block;}
+.device-picker-menu{
+  display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:130;
+  background:var(--surface); border:1.5px solid var(--line); border-radius:var(--radius-md);
+  box-shadow:var(--shadow-lift); padding:8px; min-width:220px;
+  grid-template-columns:1fr 1fr; gap:3px;
+}
+.device-picker-menu.is-open{display:grid;}
+.device-picker-menu button{
+  display:flex; align-items:center; gap:8px; padding:10px 11px; border-radius:var(--radius-sm);
+  border:none; background:transparent; font-family:inherit; font-size:12.5px; font-weight:600;
+  color:var(--ink); cursor:pointer; text-align:left; white-space:nowrap;
+}
+.device-picker-menu button:hover{background:var(--primary-tint); color:var(--primary-ink);}
+@media (max-width:420px){ .device-picker-menu{grid-template-columns:1fr; min-width:170px;} }
 .kanvas-templates{
   display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px;
   padding-bottom:16px; border-bottom:1px dashed var(--line);
@@ -693,11 +708,22 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
           <button class="btn btn-ghost" data-template="tree">Tree</button>
         </div>
         <div class="kanvas-toolbar">
-          <button class="btn btn-ghost" data-add="laptop">+ 💻 Laptop</button>
-          <button class="btn btn-ghost" data-add="switch">+ 🔀 Switch</button>
-          <button class="btn btn-ghost" data-add="router">+ 📡 Router</button>
-          <button class="btn btn-ghost" data-add="server">+ 🖥️ Server</button>
-          <button class="btn btn-ghost" data-add="firewall">+ 🛡️ Firewall</button>
+          <div class="device-picker">
+            <button class="btn btn-primary" id="btnDevicePicker">+ Tambah Perangkat ▾</button>
+            <div class="device-picker-menu" id="devicePickerMenu">
+              <button data-add="laptop">💻 Laptop</button>
+              <button data-add="switch">🔀 Switch</button>
+              <button data-add="router">📡 Router</button>
+              <button data-add="server">🖥️ Server</button>
+              <button data-add="firewall">🛡️ Firewall</button>
+              <button data-add="hub">🔌 Hub</button>
+              <button data-add="accesspoint">📶 Access Point</button>
+              <button data-add="modem">📻 Modem</button>
+              <button data-add="internet">🌐 Internet</button>
+              <button data-add="dnsserver">📖 DNS Server</button>
+              <button data-add="dhcpserver">🎫 DHCP Server</button>
+            </div>
+          </div>
           <button class="btn btn-ghost" id="btnConnectMode">🔗 Mode Sambung</button>
           <button class="btn btn-ghost" id="btnDeleteMode">🗑️ Mode Hapus</button>
           <button class="btn btn-ghost" id="btnResetCanvas">↺ Reset Kanvas</button>
@@ -743,7 +769,7 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
     <div class="card kanvas-missions">
       <div class="kanvas-missions-head">
         <h4>🎯 Misi Kanvas</h4>
-        <span class="eyebrow" style="margin:0;" id="missionCounter">0/6 misi selesai</span>
+        <span class="eyebrow" style="margin:0;" id="missionCounter">0/7 misi selesai</span>
       </div>
       <p class="kanvas-missions-sub">Tantangan singkat langsung di kanvas atas — otomatis tercentang begitu syaratnya terpenuhi, tidak perlu tombol cek.</p>
       <ul class="mission-list" id="missionList"><!-- injected by JS --></ul>
@@ -989,7 +1015,7 @@ footer p{margin:0; font-size:13.5px; color:var(--muted);}
    Setelah proxy jadi, ganti URL kosong di bawah ini dengan URL
    proxy-mu, contoh: 'https://netflow-ai-proxy.namamu.workers.dev'
    ================================================================== */
-const AI_PROXY_URL = 'https://netflow-ai-proxy.raffisirojudin.workers.dev/';
+const AI_PROXY_URL = '';
 
 /* ==================================================================
    DATA
@@ -1073,9 +1099,10 @@ const MISSIONS = [
   {id:'through-router', title:'Lewat Router', desc:'Berhasil kirim data yang melewati Router setidaknya sekali.'},
   {id:'see-error', title:'Kenali Kegagalan', desc:'Coba kirim data ke perangkat yang belum tersambung, dan lihat pesan errornya muncul.'},
   {id:'tree-master', title:'Arsitek Tree', desc:'Bangun topologi berjenjang: minimal 1 Router, 2 Switch, dan 2 Laptop, lalu berhasil kirim data lewat Router.'},
-  {id:'firewall-guard', title:'Penjaga Gerbang', desc:'Tambahkan Firewall, klik untuk atur aturan blokir dari salah satu sumber, lalu buktikan blokirnya bekerja dengan mengirim data dari sumber itu.'}
+  {id:'firewall-guard', title:'Penjaga Gerbang', desc:'Tambahkan Firewall, klik untuk atur aturan blokir dari salah satu sumber, lalu buktikan blokirnya bekerja dengan mengirim data dari sumber itu.'},
+  {id:'reach-internet', title:'Sampai ke Internet', desc:'Tambahkan perangkat Internet, sambungkan lewat Router, lalu berhasil kirim data sampai ke sana.'}
 ];
-const missionState = {basicLink:false, starHub:false, throughRouter:false, sawError:false, treeMaster:false, firewallProven:false, celebrated:false};
+const missionState = {basicLink:false, starHub:false, throughRouter:false, sawError:false, treeMaster:false, firewallProven:false, reachedInternet:false, celebrated:false};
 
 function renderMissionList(){
   const list = document.getElementById('missionList');
@@ -1096,7 +1123,8 @@ function updateMissionUI(){
     'through-router': missionState.throughRouter,
     'see-error': missionState.sawError,
     'tree-master': missionState.treeMaster,
-    'firewall-guard': missionState.firewallProven
+    'firewall-guard': missionState.firewallProven,
+    'reach-internet': missionState.reachedInternet
   };
   let done = 0;
   Object.keys(map).forEach(id=>{
@@ -1199,9 +1227,9 @@ document.querySelectorAll('#modeSwitch button').forEach(btn=>{
    ================================================================== */
 function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
-const ICONS = {laptop:'💻', switch:'🔀', router:'📡', server:'🖥️', firewall:'🛡️'};
-const LABELS = {laptop:'Laptop', switch:'Switch', router:'Router', server:'Server', firewall:'Firewall'};
-const typeCounters = {laptop:0, switch:0, router:0, server:0, firewall:0};
+const ICONS = {laptop:'💻', switch:'🔀', router:'📡', server:'🖥️', firewall:'🛡️', hub:'🔌', accesspoint:'📶', modem:'📻', internet:'🌐', dnsserver:'📖', dhcpserver:'🎫'};
+const LABELS = {laptop:'Laptop', switch:'Switch', router:'Router', server:'Server', firewall:'Firewall', hub:'Hub', accesspoint:'Access Point', modem:'Modem', internet:'Internet', dnsserver:'DNS Server', dhcpserver:'DHCP Server'};
+const typeCounters = {laptop:0, switch:0, router:0, server:0, firewall:0, hub:0, accesspoint:0, modem:0, internet:0, dnsserver:0, dhcpserver:0};
 let deviceIdSeq = 0;
 let canvasDevices = [];
 let canvasConnections = [];
@@ -1251,7 +1279,9 @@ function redrawConnections(){
   svg.innerHTML = canvasConnections.map(c=>{
     const a = deviceById(c.a), b = deviceById(c.b);
     if(!a || !b) return '';
-    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"></line>`;
+    const isWireless = a.type === 'accesspoint' || b.type === 'accesspoint';
+    const dash = isWireless ? ' stroke-dasharray="6 5"' : '';
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"${dash}></line>`;
   }).join('');
 }
 
@@ -1413,9 +1443,20 @@ function setInteractionMode(mode){
 }
 document.getElementById('btnConnectMode').addEventListener('click', ()=> setInteractionMode('connect'));
 document.getElementById('btnDeleteMode').addEventListener('click', ()=> setInteractionMode('delete'));
-document.querySelectorAll('.kanvas-toolbar [data-add]').forEach(btn=>{
-  btn.addEventListener('click', ()=> addDevice(btn.dataset.add));
+
+const btnDevicePicker = document.getElementById('btnDevicePicker');
+const devicePickerMenu = document.getElementById('devicePickerMenu');
+btnDevicePicker.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  devicePickerMenu.classList.toggle('is-open');
 });
+document.querySelectorAll('#devicePickerMenu [data-add]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    addDevice(btn.dataset.add);
+    devicePickerMenu.classList.remove('is-open');
+  });
+});
+document.addEventListener('click', ()=> devicePickerMenu.classList.remove('is-open'));
 
 function findPath(startId, endId){
   const adj = {};
@@ -1526,6 +1567,26 @@ async function runCanvasSequence(path){
         }
         addKanvasLog(`🛡️ ${device.label} memeriksa Layer 4 (Transport) — aturan keamanan lolos, data diteruskan.`);
         setOsiBarState(4, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(4, 'done');
+      } else if(device.type === 'hub'){
+        addKanvasLog(`🔌 ${device.label} cuma perangkat Layer 1 — dia tidak baca alamat sama sekali, cuma menyebarkan sinyal ke SEMUA perangkat yang tersambung dengannya (bukan cuma tujuan). Makanya jaringan yang pakai Hub gampang "tabrakan data".`);
+        setOsiBarState(1, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(1, 'done');
+      } else if(device.type === 'accesspoint'){
+        addKanvasLog(`📶 ${device.label} menjembatani koneksi WiFi ke jaringan kabel, membaca Layer 2 (MAC Address) seperti Switch — makanya garis sambungannya digambar putus-putus (nirkabel).`);
+        setOsiBarState(2, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(2, 'done');
+      } else if(device.type === 'modem'){
+        addKanvasLog(`📻 ${device.label} mengubah sinyal digital jadi bentuk yang bisa dikirim lewat jalur ISP — bekerja di Layer 1 (Physical), gerbang menuju jaringan di luar rumah/kantor.`);
+        setOsiBarState(1, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(1, 'done');
+      } else if(device.type === 'internet'){
+        addKanvasLog(`🌐 Data keluar dari jaringan lokal lewat ${device.label} — sekarang mengalir di jaringan luas (WAN), dirutekan pakai Layer 3 (IP Address) seperti Router.`);
+        setOsiBarState(3, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(3, 'done');
+        missionState.reachedInternet = true;
+        updateMissionUI();
+      } else if(device.type === 'dnsserver'){
+        addKanvasLog(`📖 ${device.label} menerjemahkan nama website jadi IP Address di Layer 7 (Application), lalu memberi tahu balik ke pengirim.`);
+        setOsiBarState(7, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(7, 'done');
+      } else if(device.type === 'dhcpserver'){
+        addKanvasLog(`🎫 ${device.label} otomatis memberi alamat IP (Layer 3) ke perangkat yang baru tersambung ke jaringan, tanpa perlu diatur manual.`);
+        setOsiBarState(3, 'current'); await sleep(400); if(myGen !== kanvasRunGen) return; setOsiBarState(3, 'done');
       } else {
         addKanvasLog(`↪️ Data melewati ${device.label}.`);
       }
@@ -1534,7 +1595,13 @@ async function runCanvasSequence(path){
 
   await sleep(300);
   if(myGen !== kanvasRunGen) return;
-  addKanvasLog(`🖥️ ${toDevice.label} membongkar data kembali dari Layer 1 sampai Layer 7 — pesan diterima utuh! ✅`);
+  if(toDevice.type === 'internet'){
+    addKanvasLog(`🌐 Data sampai di ${toDevice.label} — sudah keluar sepenuhnya dari jaringan lokal dan ada di internet luas! ✅`);
+    missionState.reachedInternet = true;
+    updateMissionUI();
+  } else {
+    addKanvasLog(`🖥️ ${toDevice.label} membongkar data kembali dari Layer 1 sampai Layer 7 — pesan diterima utuh! ✅`);
+  }
   for(const L of [1,2,3,4,5,6,7]){
     if(myGen !== kanvasRunGen) return;
     setOsiBarState(L, 'current');
